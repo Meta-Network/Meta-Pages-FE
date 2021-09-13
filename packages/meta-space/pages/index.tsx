@@ -1,17 +1,32 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useCallback } from 'react'
 import type { NextPage } from 'next'
-import { Button, Input } from 'antd'
+import { Button, Input, AutoComplete, Select } from 'antd'
+import { SelectProps } from 'antd/es/select'
 import styled from 'styled-components'
 import { AudioOutlined, ArrowRightOutlined } from '@ant-design/icons'
 import { HexagonIcon, DiceIcon } from '../components/Icon/Index'
 import HexagonImage from '../assets/images/hexagon.png'
 import MetaImage from '../assets/images/meta.png'
 import Image from 'next/image'
+import { fetchInviteCodeAPI } from '../helpers/index'
+import { StoreGet, StoreSet } from '../utils/store'
+import { isEmpty, cloneDeep } from 'lodash'
+import { useMount } from 'ahooks'
+
+
+interface SearchResultListProps {
+  subdomain: string
+}
 
 const { Search } = Input
+const { Option } = Select
 
+const KeyMetaSpaceHistory = 'MetaSpaceHistory'
 
 const Home: NextPage = () => {
+  const [searchResultList, setTearchResultList] = useState<SearchResultListProps[]>([])
+  const [searchHistoryList, setSearchHistoryList] = useState<SearchResultListProps[]>([])
+  const [searchValue, setSearchValue] = useState<string>('')
 
   const LinkList = useMemo(() => {
     return [
@@ -33,14 +48,103 @@ const Home: NextPage = () => {
     ]
   }, [])
 
-  const onSearch = (value: string) => console.log(value)
+  const fetchSearchResult = useCallback(
+    async (value: string) => {
+      // const data = await fetchInviteCodeAPI()
+      const data = [
+        {
+          'subdomain': `xxxxx ${value}`,
+        },
+        {
+          'subdomain': `xxxxrrr ${value}`,
+        },
+        {
+          'subdomain': `xiaotian ${value}`,
+        }
+      ]
+      if (data) {
+        setTearchResultList(data)
+      }
+    },
+    [],
+  )
+
+  const onSelect = (value: string) => {
+    console.log('onSelect', value)
+  }
+
+  const handleChange = (value: string): void => {
+    console.log(`selected ${value}`)
+  }
+
+  const handleSearchChange = (value: any): void => {
+    console.log(value)
+    setSearchValue(value.target.value)
+  }
+
+  /**
+ * 获取历史浏览
+ */
+  const fetchHistory = useCallback(() => {
+    const historyStringify = StoreGet(KeyMetaSpaceHistory)
+    let historyList: SearchResultListProps[] = historyStringify ? JSON.parse(historyStringify) : []
+    setSearchHistoryList(historyList)
+  }, [])
+
+  const handleHistory = useCallback(
+    (subdomain: string) => {
+      const historyStringify = StoreGet(KeyMetaSpaceHistory)
+      const historyData = {
+        subdomain: subdomain
+      }
+
+      // 没有历史记录
+      if (isEmpty(historyStringify)) {
+        StoreSet(KeyMetaSpaceHistory, JSON.stringify([historyData]))
+      } else {
+        let historyList: SearchResultListProps[] = historyStringify ? JSON.parse(historyStringify) : []
+        const historyListIdx = historyList.findIndex(i => i.subdomain === subdomain)
+
+        if (~historyListIdx) {
+          const temp = cloneDeep(historyList[historyListIdx])
+          historyList.splice(historyListIdx, 1)
+          historyList.push(temp)
+        } else {
+          if (historyList.length >= 5) {
+            historyList.shift()
+          }
+          historyList.push(historyData)
+        }
+
+        StoreSet(KeyMetaSpaceHistory, JSON.stringify(historyList))
+      }
+
+      fetchHistory()
+    },
+    [fetchHistory],
+  )
+
+  const onSearch = (value: string) => {
+    console.log(value)
+    handleHistory(value)
+    fetchSearchResult(value)
+  }
+
+
+  // init
+  useMount(
+    () => {
+      fetchHistory()
+    }
+  )
+
 
   return (
     <StyledWrapper>
       <StyledHead>
         <StyledHeadIcon></StyledHeadIcon>
         <StyledHeadTitleBox>
-          <StyledHeadSub>launcher</StyledHeadSub>
+          <StyledHeadSub>Launcher</StyledHeadSub>
           <StyledHeadTitle>Meta Space</StyledHeadTitle>
         </StyledHeadTitleBox>
       </StyledHead>
@@ -48,7 +152,7 @@ const Home: NextPage = () => {
 
       <StyledSearchBox>
         <StyledSearch>
-          <StyledSearchInputt placeholder="Sub Domain" onSearch={onSearch} style={{ width: 180 }} />
+          <StyledSearchInput placeholder="Sub Domain" style={{ width: 240 }} onSearch={onSearch} onChange={handleSearchChange} />
           <StyledSearchUrl>.metaspaces.me</StyledSearchUrl>
         </StyledSearch>
         <StyledSearchButtonBox>
@@ -56,6 +160,35 @@ const Home: NextPage = () => {
           <StyledSearchButton icon={<StyledHeadDiceIcon />}>Random</StyledSearchButton>
         </StyledSearchButtonBox>
       </StyledSearchBox>
+      <StyledSearchResult>
+
+        {
+          searchValue
+            ?
+            <StyledSearchSelect defaultValue="result" style={{ width: 120 }} onChange={handleChange}
+              dropdownClassName="1"
+              className="custom-search-select"
+            >
+              <Option value="result">Result</Option>
+              <Option value="history">History</Option>
+            </StyledSearchSelect>
+            : <StyledSearchTitle>History</StyledSearchTitle>
+        }
+        {
+          1 ? <StyledSearchList>
+            {
+              (searchValue ? searchResultList : searchHistoryList).map((i, key) => (
+                <li key={key}>
+                  <StyledSearchListLink href="https://meta-cms.vercel.mttk.net">
+                    <StyledListIcon />
+                    <StyledSearchListText>Sub Domain - {i.subdomain}</StyledSearchListText>
+                  </StyledSearchListLink>
+                </li>
+              ))
+            }
+          </StyledSearchList> : null
+        }
+      </StyledSearchResult>
 
       <StyledtutorialBox>
         <StyledtutorialText>【Guide】Build your owner Meta space in 5 minutes</StyledtutorialText>
@@ -66,7 +199,7 @@ const Home: NextPage = () => {
           LinkList.map((i, idx) => (
             <StyledLink href={i.url} rel="noopener noreferrer" target="_blank" key={idx}>
               <StyledLinkLogo>
-                <Image width={40} height={40} src={i.logo} alt={'logo'} layout="fill" objectFit="contain"  />
+                <Image src={i.logo} alt={'logo'} layout="fill" objectFit="contain" />
               </StyledLinkLogo>
               <StyledLinkText>{i.text}</StyledLinkText>
             </StyledLink>
@@ -93,6 +226,7 @@ const StyledHead = styled.section`
   padding-top: 120px;
   display: flex;
   align-items: center;
+  justify-content: center;
   @media screen and (max-width: 768px) {
     max-width: 90%;
     padding-top: 60px;
@@ -142,11 +276,65 @@ const StyledSearchBox = styled.section`
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  /* justify-content: center; */
   @media screen and (max-width: 768px) {
     max-width: 90%;
     margin-top: 60px;
   }
 `
+
+const StyledSearchResult = styled.section`
+  width: 780px;
+  margin: 20px auto 0;
+  @media screen and (max-width: 768px) {
+    max-width: 90%;
+  }
+`
+const StyledSearchSelect = styled(Select)`
+  .ant-select-selector {
+    border: none !important;
+  }
+  &.ant-select-focused:not(.ant-select-disabled).ant-select:not(.ant-select-customize-input) .ant-select-selector {
+    box-shadow: none;
+  }
+`
+const StyledSearchTitle = styled.span`
+  font-size: 14px;
+`
+const StyledSearchList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+  width: 240px;
+`
+const StyledSearchListLi = styled.li``
+const StyledSearchListLink = styled.a`
+  display: flex;
+  align-items: center;
+  color: #333;
+  padding: 6px 4px;
+  &:hover {
+    color: #333;
+    background-color: #f5f5f5;
+  }
+`
+const StyledSearchListText = styled.span`
+  font-size: 14px;
+  margin-left: 10px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+`
+
+const StyledListIcon = styled(HexagonIcon)`
+  width: 20px;
+  height: 20px;
+  /* @media screen and (max-width: 768px) {
+    width: 70px;
+    height: 70px;
+  } */
+`
+
 const StyledSearch = styled.section`
   display: flex;
   align-items: flex-end;
@@ -156,7 +344,8 @@ const StyledSearch = styled.section`
     margin-bottom: 20px;
   }
 `
-const StyledSearchInputt = styled(Search)`
+
+const StyledSearchInput = styled(Search)`
   border-bottom: 1px solid #333;
   .ant-btn,
   .ant-input {
@@ -194,6 +383,7 @@ const StyledSearchButton = styled(Button)`
 const StyledtutorialBox = styled.section`
   width: 780px;
   margin: auto auto 0;
+  text-align: center;
   @media screen and (max-width: 768px) {
     max-width: 90%;
   }
@@ -213,34 +403,29 @@ const StyledtutorialText = styled.a`
 
 const StyledLinkBox = styled.section`
   width: 780px;
-  margin: 40px auto;
+  margin: 10px auto;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  justify-content: center;
   @media screen and (max-width: 768px) {
     max-width: 90%;
-    margin-top: 20px;
-    margin-bottom: 20px;
   }
 `
 const StyledLinkLogo = styled.section`
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: 20px;
+  height: 20px;
   @media screen and (max-width: 768px) {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
   }
 `
 const StyledLink = styled.a`
   padding: 0;
-  margin-top: 10px;
-  margin-right: 20px;
+  margin: 10px 10px 0 10px;
   display: flex;
   align-items: center;
-  &:nth-last-of-type(1) {
-    margin-right: 0;
-  }
 `
 
 const StyledLinkText = styled.span`
