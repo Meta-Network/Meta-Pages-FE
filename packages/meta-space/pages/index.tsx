@@ -3,16 +3,17 @@ import type { NextPage } from 'next'
 import { Button, Input, AutoComplete, Select } from 'antd'
 import { SelectProps } from 'antd/es/select'
 import styled from 'styled-components'
-import { AudioOutlined, ArrowRightOutlined } from '@ant-design/icons'
+import { AudioOutlined, ArrowRightOutlined, CloseOutlined } from '@ant-design/icons'
 import { HexagonIcon, DiceIcon } from '../components/Icon/Index'
 import HexagonImage from '../assets/images/hexagon.png'
 import MetaImage from '../assets/images/meta.png'
 import Image from 'next/image'
 import { fetchInviteCodeAPI } from '../helpers/index'
 import { StoreGet, StoreSet } from '../utils/store'
-import { isEmpty, cloneDeep } from 'lodash'
-import { useMount } from 'ahooks'
+import { isEmpty, cloneDeep, trim } from 'lodash'
+import { useMount, useDebounceFn } from 'ahooks'
 
+import Footer from '../components/Footer/Index'
 
 interface SearchResultListProps {
   subdomain: string
@@ -23,33 +24,44 @@ const { Option } = Select
 
 const KeyMetaSpaceHistory = 'MetaSpaceHistory'
 
+// 友情链接
+const LinkList = [
+  {
+    logo: HexagonImage,
+    text: 'Meta Space Wiki',
+    url: 'https://github.com/Meta-Network',
+  },
+  {
+    logo: MetaImage,
+    text: 'Meta Network',
+    url: 'https://meta-network.mttk.net'
+  },
+  {
+    logo: MetaImage,
+    text: 'Meta.io',
+    url: 'https://meta.io'
+  }
+]
+
 const Home: NextPage = () => {
+  // 搜索结果列表
   const [searchResultList, setTearchResultList] = useState<SearchResultListProps[]>([])
+  // 搜索历史列表
   const [searchHistoryList, setSearchHistoryList] = useState<SearchResultListProps[]>([])
+  // 搜索内容
   const [searchValue, setSearchValue] = useState<string>('')
+  // 当前选择值
+  const [selectValue, setSelectValue] = useState<'result' | 'history'>('result')
 
-  const LinkList = useMemo(() => {
-    return [
-      {
-        logo: HexagonImage,
-        text: 'Meta Space Wiki',
-        url: 'https://github.com/Meta-Network',
-      },
-      {
-        logo: MetaImage,
-        text: 'Meta Network',
-        url: 'https://meta-network.mttk.net'
-      },
-      {
-        logo: MetaImage,
-        text: 'Meta.io',
-        url: 'https://meta.io'
-      }
-    ]
-  }, [])
-
+  /**
+   * 获取搜索结果
+   */
   const fetchSearchResult = useCallback(
     async (value: string) => {
+      if (!value) {
+        return
+      }
+
       // const data = await fetchInviteCodeAPI()
       const data = [
         {
@@ -69,18 +81,41 @@ const Home: NextPage = () => {
     [],
   )
 
-  const onSelect = (value: string) => {
-    console.log('onSelect', value)
+  // 搜索结果活着历史记录列表
+  const resultOrHistoryList = useMemo(() => {
+    let list = {
+      result: searchResultList,
+      history: searchHistoryList,
+    }
+
+    return list[selectValue] || list['history']
+  }, [selectValue, searchHistoryList, searchResultList])
+
+
+  /**
+   * 处理选择切换改变
+   */
+  const handleSelectChange = (value: any): void => {
+    setSelectValue(value)
   }
 
-  const handleChange = (value: string): void => {
-    console.log(`selected ${value}`)
-  }
-
-  const handleSearchChange = (value: any): void => {
-    console.log(value)
-    setSearchValue(value.target.value)
-  }
+  /**
+   * 处理搜索改变
+   */
+  const { run: handleSearchChange } = useDebounceFn(
+    (e: any) => {
+      console.log(e)
+      const value = trim(e.target.value)
+      setSearchValue(value)
+      if (value) {
+        handleHistory(value)
+        fetchSearchResult(value)
+      }
+    },
+    {
+      wait: 300,
+    },
+  )
 
   /**
  * 获取历史浏览
@@ -91,11 +126,19 @@ const Home: NextPage = () => {
     setSearchHistoryList(historyList)
   }, [])
 
+  /**
+   * 处理历史记录
+   */
   const handleHistory = useCallback(
     (subdomain: string) => {
+
+      if (!subdomain) {
+        return
+      }
+
       const historyStringify = StoreGet(KeyMetaSpaceHistory)
       const historyData = {
-        subdomain: subdomain
+        subdomain: trim(subdomain)
       }
 
       // 没有历史记录
@@ -124,12 +167,40 @@ const Home: NextPage = () => {
     [fetchHistory],
   )
 
-  const onSearch = (value: string) => {
+  /**
+   * 处理搜索回车
+   */
+  const handleSearch = (value: string) => {
     console.log(value)
     handleHistory(value)
     fetchSearchResult(value)
   }
 
+  /**
+   * 删除历史记录
+   */
+  const deleteHistory = useCallback(
+    (item: SearchResultListProps) => {
+      const historyStringify = StoreGet(KeyMetaSpaceHistory)
+      let historyList: SearchResultListProps[] = historyStringify ? JSON.parse(historyStringify) : []
+      const historyListIdx = historyList.findIndex(i => i.subdomain === item.subdomain)
+
+      if (~historyListIdx) {
+        historyList.splice(historyListIdx, 1)
+        StoreSet(KeyMetaSpaceHistory, JSON.stringify(historyList))
+      }
+      fetchHistory()
+    },
+    [fetchHistory],
+  )
+
+  /**
+   * 处理删除历史记录
+   */
+  const handleDeleteHistory = (e: any, item: SearchResultListProps) => {
+    e.preventDefault()
+    deleteHistory(item)
+  }
 
   // init
   useMount(
@@ -151,44 +222,65 @@ const Home: NextPage = () => {
 
 
       <StyledSearchBox>
-        <StyledSearch>
-          <StyledSearchInput placeholder="Sub Domain" style={{ width: 240 }} onSearch={onSearch} onChange={handleSearchChange} />
-          <StyledSearchUrl>.metaspaces.me</StyledSearchUrl>
-        </StyledSearch>
-        <StyledSearchButtonBox>
-          <StyledSearchButton icon={<ArrowRightOutlined />}>Vist</StyledSearchButton>
-          <StyledSearchButton icon={<StyledHeadDiceIcon />}>Random</StyledSearchButton>
-        </StyledSearchButtonBox>
-      </StyledSearchBox>
-      <StyledSearchResult>
+        <StyledSearchBoxInput>
+          <StyledSearch>
+            <StyledSearchInput placeholder="Sub Domain" style={{ width: 240 }} onSearch={handleSearch} onChange={handleSearchChange} />
+            <StyledSearchUrl>.metaspaces.me</StyledSearchUrl>
+          </StyledSearch>
+          <StyledSearchButtonBox>
+            <StyledSearchButton icon={<ArrowRightOutlined />}>Vist</StyledSearchButton>
+            <StyledSearchButton icon={<StyledHeadDiceIcon />}>Random</StyledSearchButton>
+          </StyledSearchButtonBox>
+        </StyledSearchBoxInput>
 
+        {/* History or Search result */}
         {
           searchValue
-            ?
-            <StyledSearchSelect defaultValue="result" style={{ width: 120 }} onChange={handleChange}
-              dropdownClassName="1"
-              className="custom-search-select"
-            >
-              <Option value="result">Result</Option>
-              <Option value="history">History</Option>
-            </StyledSearchSelect>
-            : <StyledSearchTitle>History</StyledSearchTitle>
+            ? <StyledSearchResult>
+              <StyledSearchSelect value={selectValue} defaultValue="result" style={{ width: 120 }} onChange={handleSelectChange}
+                dropdownClassName="1"
+                className="custom-search-select"
+              >
+                <Option value="result">Result</Option>
+                <Option value="history">History</Option>
+              </StyledSearchSelect>
+              <StyledSearchList>
+                {
+                  resultOrHistoryList.map((i, key) => (
+                    <li key={key}>
+                      <StyledSearchListLink href="https://meta-cms.vercel.mttk.net" target="_blank" rel="noopener noreferrer">
+                        <StyledListIcon />
+                        <StyledSearchListText>Sub Domain - {i.subdomain}</StyledSearchListText>
+                        {
+                          selectValue === 'history'
+                            ? <StyledListDeleteIcon onClick={(e: any) => handleDeleteHistory(e, i)} />
+                            : null
+                        }
+                      </StyledSearchListLink>
+                    </li>
+                  ))
+                }
+              </StyledSearchList>
+            </StyledSearchResult>
+            : <StyledSearchResult>
+              <StyledSearchTitle>History</StyledSearchTitle>
+              <StyledSearchList>
+                {
+                  searchHistoryList.map((i, key) => (
+                    <li key={key}>
+                      <StyledSearchListLink href="https://meta-cms.vercel.mttk.net" target="_blank" rel="noopener noreferrer">
+                        <StyledListIcon />
+                        <StyledSearchListText>Sub Domain - {i.subdomain}</StyledSearchListText>
+                        <StyledListDeleteIcon onClick={(e: any) => handleDeleteHistory(e, i)} />
+                      </StyledSearchListLink>
+                    </li>
+                  ))
+                }
+              </StyledSearchList>
+            </StyledSearchResult>
         }
-        {
-          1 ? <StyledSearchList>
-            {
-              (searchValue ? searchResultList : searchHistoryList).map((i, key) => (
-                <li key={key}>
-                  <StyledSearchListLink href="https://meta-cms.vercel.mttk.net">
-                    <StyledListIcon />
-                    <StyledSearchListText>Sub Domain - {i.subdomain}</StyledSearchListText>
-                  </StyledSearchListLink>
-                </li>
-              ))
-            }
-          </StyledSearchList> : null
-        }
-      </StyledSearchResult>
+
+      </StyledSearchBox>
 
       <StyledtutorialBox>
         <StyledtutorialText>【Guide】Build your owner Meta space in 5 minutes</StyledtutorialText>
@@ -207,9 +299,7 @@ const Home: NextPage = () => {
         }
       </StyledLinkBox>
 
-      <StyledFooter>
-        <p>© 2021 Meta Network All Rights Served</p>
-      </StyledFooter>
+      <Footer></Footer>
     </StyledWrapper>
   )
 }
@@ -271,24 +361,27 @@ const StyledHeadSub = styled.span`
 `
 
 const StyledSearchBox = styled.section`
-  width: 780px;
-  margin: 100px auto 0;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  /* justify-content: center; */
+  width: 600px;
+  margin: 100px auto 40px;
   @media screen and (max-width: 768px) {
     max-width: 90%;
     margin-top: 60px;
   }
 `
+const StyledSearchBoxInput = styled.section`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`
+
 
 const StyledSearchResult = styled.section`
-  width: 780px;
+  /* width: 780px;
   margin: 20px auto 0;
   @media screen and (max-width: 768px) {
     max-width: 90%;
-  }
+  } */
+  margin-top: 20px;
 `
 const StyledSearchSelect = styled(Select)`
   .ant-select-selector {
@@ -313,13 +406,13 @@ const StyledSearchListLink = styled.a`
   align-items: center;
   color: #333;
   padding: 6px 4px;
+  font-size: 14px;
   &:hover {
     color: #333;
     background-color: #f5f5f5;
   }
 `
 const StyledSearchListText = styled.span`
-  font-size: 14px;
   margin-left: 10px;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -329,16 +422,15 @@ const StyledSearchListText = styled.span`
 const StyledListIcon = styled(HexagonIcon)`
   width: 20px;
   height: 20px;
-  /* @media screen and (max-width: 768px) {
-    width: 70px;
-    height: 70px;
-  } */
+  flex: 0 0 20px;
+`
+const StyledListDeleteIcon = styled(CloseOutlined)`
+  margin-left: 10px;
 `
 
 const StyledSearch = styled.section`
   display: flex;
   align-items: flex-end;
-  margin-right: 20px;
   @media screen and (max-width: 768px) {
     margin-left: 0;
     margin-bottom: 20px;
@@ -368,6 +460,7 @@ const StyledSearchUrl = styled.span`
 const StyledSearchButtonBox = styled.section`
   display: flex;
   align-items: center;
+  margin-left: auto;
 `
 const StyledSearchButton = styled(Button)`
   margin-left: 10px;
@@ -441,22 +534,6 @@ const StyledLinkText = styled.span`
   }
 `
 
-const StyledFooter = styled.section`
-  text-align: center;
-  padding: 20px 0;
-  border-top: 1px solid #f1f1f1;
-  p {
-    font-size: 14px;
-    padding: 0;
-    margin: 0;
-    color: #717171;
-  }
-  @media screen and (max-width: 768px) {
-    padding: 10px 0;
-    p {
-      font-size: 12px;
-    }
-  }
-`
+
 
 export default Home
