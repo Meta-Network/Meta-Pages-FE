@@ -144,14 +144,6 @@ const Home: NextPage = () => {
     [fetchHistory],
   )
 
-  /**
-   * 处理删除历史记录
-   */
-  const handleDeleteHistory = (e: React.MouseEvent<HTMLSpanElement, MouseEvent>, item: HistoryListState) => {
-    e.stopPropagation()
-    deleteHistory(item)
-  }
-
   // init
   useMount(
     () => {
@@ -269,7 +261,7 @@ const Home: NextPage = () => {
                     ? <HistoryList
                       list={searchHistoryList}
                       handleHistoryEventClick={handleHistoryEventClick}
-                      handleDeleteHistory={handleDeleteHistory}></HistoryList>
+                      deleteHistory={deleteHistory}></HistoryList>
                     : null
               }
 
@@ -280,7 +272,7 @@ const Home: NextPage = () => {
               <HistoryList
                 list={searchHistoryList}
                 handleHistoryEventClick={handleHistoryEventClick}
-                handleDeleteHistory={handleDeleteHistory}></HistoryList>
+                deleteHistory={deleteHistory}></HistoryList>
             </StyledSearchResult>
         }
 

@@ -8,10 +8,19 @@ import { CloseOutlined } from '@ant-design/icons'
 interface Props {
   readonly list: HistoryListState[]
   handleHistoryEventClick: (val: string) => void
-  handleDeleteHistory: (e: React.MouseEvent<HTMLSpanElement, MouseEvent>, val: HistoryListState) => void
+  deleteHistory: (val: HistoryListState) => void
 }
 
-const HistoryList: React.FC<Props> = ({ list, handleHistoryEventClick, handleDeleteHistory }) => {
+const HistoryList: React.FC<Props> = ({ list, handleHistoryEventClick, deleteHistory }) => {
+
+  /**
+ * 处理删除历史记录
+ */
+  const handleDeleteHistory = (e: React.MouseEvent<HTMLSpanElement, MouseEvent>, item: HistoryListState) => {
+    e.stopPropagation()
+    deleteHistory(item)
+  }
+
   return (
     <StyledSearchList>
       {
