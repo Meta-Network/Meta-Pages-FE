@@ -1,10 +1,10 @@
 import React, { useMemo, useState, useCallback } from 'react'
 import type { NextPage } from 'next'
-import { Button, Input, Empty, Select } from 'antd'
+import { Button, Input, Empty, Select, message } from 'antd'
 import styled from 'styled-components'
 import { AudioOutlined, ArrowRightOutlined, CloseOutlined } from '@ant-design/icons'
 import { HexagonIcon, DiceIcon } from '../components/Icon/Index'
-import { FetchDomainFindAPI } from '../helpers/index'
+import { FetchDomainFindAPI, FetchSiteConfigRandomAPI } from '../helpers/index'
 import { StoreGet, StoreSet } from '../utils/store'
 import { isEmpty, cloneDeep, trim } from 'lodash'
 import { useMount, useDebounceFn } from 'ahooks'
@@ -12,7 +12,7 @@ import HistoryList from '../components/HistoryList/Index'
 import MediaLink from '../components/MediaLink/Index'
 
 import Footer from '../components/Footer/Index'
-import { DomainFindAPIResultState } from '../typings/cms'
+import { DomainData } from '../typings/cms'
 import { HistoryListState } from '../typings'
 
 
@@ -23,13 +23,14 @@ const KeyMetaSpaceHistory = 'MetaSpaceHistory'
 
 const Home: NextPage = () => {
   // 搜索结果列表
-  const [searchResultList, setTearchResultList] = useState<DomainFindAPIResultState[]>([])
+  const [searchResultList, setTearchResultList] = useState<DomainData[]>([])
   // 搜索历史列表
   const [searchHistoryList, setSearchHistoryList] = useState<HistoryListState[]>([])
   // 搜索内容
   const [searchValue, setSearchValue] = useState<string>('')
   // 当前选择值
   const [selectValue, setSelectValue] = useState<'result' | 'history'>('result')
+  const [loadingRandom, setLoadingRandom] = useState<boolean>(false)
 
   /**
    * 获取搜索结果
@@ -102,7 +103,7 @@ const Home: NextPage = () => {
           historyList.splice(historyListIdx, 1)
           historyList.push(temp)
         } else {
-          if (historyList.length >= 5) {
+          if (historyList.length >= 10) {
             historyList.shift()
           }
           historyList.push(historyData)
@@ -167,6 +168,37 @@ const Home: NextPage = () => {
     setSelectValue('result')
   }
 
+  /**
+   * random click
+   */
+  const handleRandomEvent = async (): Promise<void> => {
+    setLoadingRandom(true)
+    const data = await FetchSiteConfigRandomAPI()
+    setLoadingRandom(false)
+    if (data) {
+      const value = data.metaSpacePrefix
+      setSearchValue(value)
+      handleHistory(value)
+      fetchSearchResult(value)
+    }
+  }
+
+  /**
+   * vist click
+   */
+  const handleVistEvent = () => {
+    if (!searchValue) {
+      message.info('请输入搜索内容')
+      return
+    }
+
+    if (!isEmpty(searchResultList) && searchResultList[0].domain) {
+      window.open(`https://${searchResultList[0].domain}`)
+    } else {
+      message.info('没有可以跳转的地址')
+    }
+  }
+
   return (
     <StyledWrapper>
       <StyledHead>
@@ -190,8 +222,12 @@ const Home: NextPage = () => {
             <StyledSearchUrl>.metaspaces.me</StyledSearchUrl>
           </StyledSearch>
           <StyledSearchButtonBox>
-            <StyledSearchButton icon={<ArrowRightOutlined />}>Vist</StyledSearchButton>
-            <StyledSearchButton icon={<StyledHeadDiceIcon />}>Random</StyledSearchButton>
+            <StyledSearchButton icon={<ArrowRightOutlined />} 
+            onClick={handleVistEvent}>Vist</StyledSearchButton>
+            <StyledSearchButton 
+            loading={loadingRandom}
+            icon={<StyledHeadDiceIcon />} 
+            onClick={handleRandomEvent}>Random</StyledSearchButton>
           </StyledSearchButtonBox>
         </StyledSearchBoxInput>
 

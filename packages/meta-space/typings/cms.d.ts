@@ -3,9 +3,9 @@ export interface DomainFindAPIParamsState {
   limit: number
 }
 
-export interface DomainFindAPIResultState {
+export interface DomainData {
   'language': 'zh'
-  'timezone': string
+  'timezone': 'UTC+8'
   'templateId': 4
   'domain': string
   'storeType': 'GITHUB'
@@ -26,7 +26,7 @@ export interface DomainFindAPIResultState {
     'description': string
     'author': string
     'keywords': [
-      'MetaSpace'
+      'MetaSpace', 'tag'
     ]
     'favicon': string
     'id': number
