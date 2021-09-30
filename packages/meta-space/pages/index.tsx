@@ -185,7 +185,7 @@ const Home: NextPage = () => {
     }
 
     if (!isEmpty(searchResultList) && searchResultList[0].domain) {
-      window.open(`https://${searchResultList[0].domain}`)
+      window.open(`https://${searchResultList[0].domain}`, '_blank')
     } else {
       message.info('没有可以跳转的地址')
     }
