@@ -1,10 +1,10 @@
 import factoryClient from './factoryClient'
 
 /**
- * META Network API
+ * META CMS API
  */
-export const API = factoryClient({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_API as string
+export const CMS_API = factoryClient({
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_CMS_API as string
 })
 
 /**

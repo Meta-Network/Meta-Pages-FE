@@ -1,53 +1,31 @@
 import React, { useMemo, useState, useCallback } from 'react'
 import type { NextPage } from 'next'
-import { Button, Input, AutoComplete, Select } from 'antd'
-import { SelectProps } from 'antd/es/select'
+import { Button, Input, Empty, Select } from 'antd'
 import styled from 'styled-components'
 import { AudioOutlined, ArrowRightOutlined, CloseOutlined } from '@ant-design/icons'
 import { HexagonIcon, DiceIcon } from '../components/Icon/Index'
-import HexagonImage from '../assets/images/hexagon.png'
-import MetaImage from '../assets/images/meta.png'
-import Image from 'next/image'
-import { fetchInviteCodeAPI } from '../helpers/index'
+import { FetchDomainFindAPI } from '../helpers/index'
 import { StoreGet, StoreSet } from '../utils/store'
 import { isEmpty, cloneDeep, trim } from 'lodash'
 import { useMount, useDebounceFn } from 'ahooks'
+import HistoryList from '../components/HistoryList/Index'
+import MediaLink from '../components/MediaLink/Index'
 
 import Footer from '../components/Footer/Index'
+import { DomainFindAPIResultState } from '../typings/cms'
+import { HistoryListState } from '../typings'
 
-interface SearchResultListProps {
-  subdomain: string
-}
 
 const { Search } = Input
 const { Option } = Select
 
 const KeyMetaSpaceHistory = 'MetaSpaceHistory'
 
-// 友情链接
-const LinkList = [
-  {
-    logo: HexagonImage,
-    text: 'Meta Space Wiki',
-    url: 'https://github.com/Meta-Network',
-  },
-  {
-    logo: MetaImage,
-    text: 'Meta Network',
-    url: 'https://meta-network.mttk.net'
-  },
-  {
-    logo: MetaImage,
-    text: 'Meta.io',
-    url: 'https://meta.io'
-  }
-]
-
 const Home: NextPage = () => {
   // 搜索结果列表
-  const [searchResultList, setTearchResultList] = useState<SearchResultListProps[]>([])
+  const [searchResultList, setTearchResultList] = useState<DomainFindAPIResultState[]>([])
   // 搜索历史列表
-  const [searchHistoryList, setSearchHistoryList] = useState<SearchResultListProps[]>([])
+  const [searchHistoryList, setSearchHistoryList] = useState<HistoryListState[]>([])
   // 搜索内容
   const [searchValue, setSearchValue] = useState<string>('')
   // 当前选择值
@@ -56,73 +34,43 @@ const Home: NextPage = () => {
   /**
    * 获取搜索结果
    */
-  const fetchSearchResult = useCallback(
+  const { run: fetchSearchResult } = useDebounceFn(
     async (value: string) => {
-      if (!value) {
+      if (!trim(value)) {
         return
       }
 
-      // const data = await fetchInviteCodeAPI()
-      const data = [
-        {
-          'subdomain': `xxxxx ${value}`,
-        },
-        {
-          'subdomain': `xxxxrrr ${value}`,
-        },
-        {
-          'subdomain': `xiaotian ${value}`,
-        }
-      ]
+      const data = await FetchDomainFindAPI({
+        prefix: trim(value),
+        limit: 10
+      })
+
       if (data) {
         setTearchResultList(data)
       }
     },
-    [],
+    { wait: 300 },
   )
-
-  // 搜索结果活着历史记录列表
-  const resultOrHistoryList = useMemo(() => {
-    let list = {
-      result: searchResultList,
-      history: searchHistoryList,
-    }
-
-    return list[selectValue] || list['history']
-  }, [selectValue, searchHistoryList, searchResultList])
-
-
-  /**
-   * 处理选择切换改变
-   */
-  const handleSelectChange = (value: any): void => {
-    setSelectValue(value)
-  }
 
   /**
    * 处理搜索改变
    */
-  const { run: handleSearchChange } = useDebounceFn(
-    (e: any) => {
-      console.log(e)
-      const value = trim(e.target.value)
-      setSearchValue(value)
-      if (value) {
-        handleHistory(value)
-        fetchSearchResult(value)
-      }
-    },
-    {
-      wait: 300,
-    },
-  )
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // console.log(e)
+    const value = trim(e.target.value)
+    setSearchValue(value)
+    if (value) {
+      handleHistory(value)
+      fetchSearchResult(value)
+    }
+  }
 
   /**
  * 获取历史浏览
  */
   const fetchHistory = useCallback(() => {
     const historyStringify = StoreGet(KeyMetaSpaceHistory)
-    let historyList: SearchResultListProps[] = historyStringify ? JSON.parse(historyStringify) : []
+    let historyList: HistoryListState[] = historyStringify ? JSON.parse(historyStringify) : []
     setSearchHistoryList(historyList)
   }, [])
 
@@ -130,23 +78,24 @@ const Home: NextPage = () => {
    * 处理历史记录
    */
   const handleHistory = useCallback(
-    (subdomain: string) => {
+    (domain: string) => {
 
-      if (!subdomain) {
+      if (!domain) {
         return
       }
 
       const historyStringify = StoreGet(KeyMetaSpaceHistory)
       const historyData = {
-        subdomain: trim(subdomain)
+        domain: trim(domain),
+        lastTime: Date.now()
       }
 
       // 没有历史记录
       if (isEmpty(historyStringify)) {
         StoreSet(KeyMetaSpaceHistory, JSON.stringify([historyData]))
       } else {
-        let historyList: SearchResultListProps[] = historyStringify ? JSON.parse(historyStringify) : []
-        const historyListIdx = historyList.findIndex(i => i.subdomain === subdomain)
+        let historyList: HistoryListState[] = historyStringify ? JSON.parse(historyStringify) : []
+        const historyListIdx = historyList.findIndex(i => i.domain === domain)
 
         if (~historyListIdx) {
           const temp = cloneDeep(historyList[historyListIdx])
@@ -180,10 +129,10 @@ const Home: NextPage = () => {
    * 删除历史记录
    */
   const deleteHistory = useCallback(
-    (item: SearchResultListProps) => {
+    (item: HistoryListState) => {
       const historyStringify = StoreGet(KeyMetaSpaceHistory)
-      let historyList: SearchResultListProps[] = historyStringify ? JSON.parse(historyStringify) : []
-      const historyListIdx = historyList.findIndex(i => i.subdomain === item.subdomain)
+      let historyList: HistoryListState[] = historyStringify ? JSON.parse(historyStringify) : []
+      const historyListIdx = historyList.findIndex(i => i.domain === item.domain)
 
       if (~historyListIdx) {
         historyList.splice(historyListIdx, 1)
@@ -197,8 +146,8 @@ const Home: NextPage = () => {
   /**
    * 处理删除历史记录
    */
-  const handleDeleteHistory = (e: any, item: SearchResultListProps) => {
-    e.preventDefault()
+  const handleDeleteHistory = (e: React.MouseEvent<HTMLSpanElement, MouseEvent>, item: HistoryListState) => {
+    e.stopPropagation()
     deleteHistory(item)
   }
 
@@ -209,6 +158,14 @@ const Home: NextPage = () => {
     }
   )
 
+  /**
+   * 处理点击历史记录
+   */
+  const handleHistoryEventClick = (val: string) => {
+    setSearchValue(val)
+    handleSearch(val)
+    setSelectValue('result')
+  }
 
   return (
     <StyledWrapper>
@@ -224,7 +181,12 @@ const Home: NextPage = () => {
       <StyledSearchBox>
         <StyledSearchBoxInput>
           <StyledSearch>
-            <StyledSearchInput placeholder="Sub Domain" style={{ width: 240 }} onSearch={handleSearch} onChange={handleSearchChange} />
+            <StyledSearchInput
+              placeholder="Sub Domain"
+              style={{ width: 240 }}
+              onSearch={handleSearch}
+              onChange={e => handleSearchChange(e)}
+              value={searchValue} />
             <StyledSearchUrl>.metaspaces.me</StyledSearchUrl>
           </StyledSearch>
           <StyledSearchButtonBox>
@@ -237,68 +199,64 @@ const Home: NextPage = () => {
         {
           searchValue
             ? <StyledSearchResult>
-              <StyledSearchSelect value={selectValue} defaultValue="result" style={{ width: 120 }} onChange={handleSelectChange}
+              <StyledSearchSelect value={selectValue} defaultValue="result" style={{ width: 120 }} onChange={(v: any) => setSelectValue(v)}
                 dropdownClassName="1"
                 className="custom-search-select"
               >
                 <Option value="result">Result</Option>
                 <Option value="history">History</Option>
               </StyledSearchSelect>
-              <StyledSearchList>
-                {
-                  resultOrHistoryList.map((i, key) => (
-                    <li key={key}>
-                      <StyledSearchListLink href="https://meta-cms.vercel.mttk.net" target="_blank" rel="noopener noreferrer">
-                        <StyledListIcon />
-                        <StyledSearchListText>Sub Domain - {i.subdomain}</StyledSearchListText>
-                        {
-                          selectValue === 'history'
-                            ? <StyledListDeleteIcon onClick={(e: any) => handleDeleteHistory(e, i)} />
-                            : null
-                        }
-                      </StyledSearchListLink>
-                    </li>
-                  ))
-                }
-              </StyledSearchList>
+
+              {
+                selectValue === 'result'
+                  ? <>
+                    <StyledSearchList>
+                      {
+                        searchResultList.map((i, key) => (
+                          <li key={key}>
+                            <StyledSearchListLink href={`https://${i.domain}`} target="_blank" rel="noopener noreferrer">
+                              <StyledListIcon />
+                              <StyledSearchListText>{i.siteInfo.title} - {i.siteInfo.author}</StyledSearchListText>
+                            </StyledSearchListLink>
+                          </li>
+                        ))
+                      }
+
+                      {
+                        searchResultList.length <= 0
+                          ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                          : null
+                      }
+                    </StyledSearchList>
+                  </>
+                  : selectValue === 'history'
+                    ? <HistoryList
+                      list={searchHistoryList}
+                      handleHistoryEventClick={handleHistoryEventClick}
+                      handleDeleteHistory={handleDeleteHistory}></HistoryList>
+                    : null
+              }
+
+
             </StyledSearchResult>
             : <StyledSearchResult>
               <StyledSearchTitle>History</StyledSearchTitle>
-              <StyledSearchList>
-                {
-                  searchHistoryList.map((i, key) => (
-                    <li key={key}>
-                      <StyledSearchListLink href="https://meta-cms.vercel.mttk.net" target="_blank" rel="noopener noreferrer">
-                        <StyledListIcon />
-                        <StyledSearchListText>Sub Domain - {i.subdomain}</StyledSearchListText>
-                        <StyledListDeleteIcon onClick={(e: any) => handleDeleteHistory(e, i)} />
-                      </StyledSearchListLink>
-                    </li>
-                  ))
-                }
-              </StyledSearchList>
+              <HistoryList
+                list={searchHistoryList}
+                handleHistoryEventClick={handleHistoryEventClick}
+                handleDeleteHistory={handleDeleteHistory}></HistoryList>
             </StyledSearchResult>
         }
 
       </StyledSearchBox>
 
       <StyledtutorialBox>
-        <StyledtutorialText>【Guide】Build your owner Meta space in 5 minutes</StyledtutorialText>
+        <StyledtutorialText
+          href="https://meta-network.vercel.app"
+          target="_blank" rel="noopener noreferrer">【Guide】Build your owner Meta space in 5 minutes</StyledtutorialText>
       </StyledtutorialBox>
 
-      <StyledLinkBox>
-        {
-          LinkList.map((i, idx) => (
-            <StyledLink href={i.url} rel="noopener noreferrer" target="_blank" key={idx}>
-              <StyledLinkLogo>
-                <Image src={i.logo} alt={'logo'} layout="fill" objectFit="contain" />
-              </StyledLinkLogo>
-              <StyledLinkText>{i.text}</StyledLinkText>
-            </StyledLink>
-          ))
-        }
-      </StyledLinkBox>
-
+      <MediaLink></MediaLink>
       <Footer></Footer>
     </StyledWrapper>
   )
@@ -425,7 +383,7 @@ const StyledListIcon = styled(HexagonIcon)`
   flex: 0 0 20px;
 `
 const StyledListDeleteIcon = styled(CloseOutlined)`
-  margin-left: 10px;
+  margin-left: auto;
 `
 
 const StyledSearch = styled.section`
@@ -493,47 +451,6 @@ const StyledtutorialText = styled.a`
     font-size: 12px;
   }
 `
-
-const StyledLinkBox = styled.section`
-  width: 780px;
-  margin: 10px auto;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-  @media screen and (max-width: 768px) {
-    max-width: 90%;
-  }
-`
-const StyledLinkLogo = styled.section`
-  position: relative;
-  width: 20px;
-  height: 20px;
-  @media screen and (max-width: 768px) {
-    width: 16px;
-    height: 16px;
-  }
-`
-const StyledLink = styled.a`
-  padding: 0;
-  margin: 10px 10px 0 10px;
-  display: flex;
-  align-items: center;
-`
-
-const StyledLinkText = styled.span`
-  font-size: 14px;
-  color: #595959;
-  font-weight: 400;
-  margin-left: 4px;
-  &:hover {
-    color: #333;
-  }
-  @media screen and (max-width: 768px) {
-    font-size: 12px;
-  }
-`
-
 
 
 export default Home

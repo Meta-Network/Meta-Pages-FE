@@ -1,23 +1,20 @@
-import { invitationsMine } from '../services/ucenter'
-import { InviitationsMineState } from '../typings/ucenter.d'
+import { DomainFindAPI } from '../services/cms'
+import { DomainFindAPIParamsState, DomainFindAPIResultState } from '../typings/cms'
 
 /**
- * pages index
- */
-
-/**
- * 获取邀请码
+ * fetch domain find api
+ * @param params
  * @returns
  */
-export const fetchInviteCodeAPI = async () => {
-  let result: InviitationsMineState[] = []
+export const FetchDomainFindAPI = async (params: DomainFindAPIParamsState): Promise<DomainFindAPIResultState[] | undefined>  => {
   try {
-    const res = await invitationsMine()
+    const res = await DomainFindAPI(params)
     if (res.statusCode === 200) {
-      result = res.data
+      return res.data
     }
+    return
   } catch (e) {
     console.log(e)
+    return
   }
-  return result
 }
