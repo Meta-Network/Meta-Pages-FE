@@ -17,7 +17,7 @@ const LinkList = [
   {
     logo: MetaImage,
     text: 'Meta Network',
-    url: 'https://meta-network.mttk.net'
+    url: process.env.NEXT_PUBLIC_META_NETWORK_URL
   },
   {
     logo: MetaImage,

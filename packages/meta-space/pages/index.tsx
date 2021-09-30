@@ -211,15 +211,15 @@ const Home: NextPage = () => {
               onSearch={handleSearch}
               onChange={e => handleSearchChange(e)}
               value={searchValue} />
-            <StyledSearchUrl>.metaspaces.me</StyledSearchUrl>
+            <StyledSearchUrl>.{process.env.NEXT_PUBLIC_META_SPACE_DOMAIN_URL}</StyledSearchUrl>
           </StyledSearch>
           <StyledSearchButtonBox>
-            <StyledSearchButton icon={<ArrowRightOutlined />} 
-            onClick={handleVistEvent}>Vist</StyledSearchButton>
-            <StyledSearchButton 
-            loading={loadingRandom}
-            icon={<StyledHeadDiceIcon />} 
-            onClick={handleRandomEvent}>Random</StyledSearchButton>
+            <StyledSearchButton icon={<ArrowRightOutlined />}
+              onClick={handleVistEvent}>Vist</StyledSearchButton>
+            <StyledSearchButton
+              loading={loadingRandom}
+              icon={<StyledHeadDiceIcon />}
+              onClick={handleRandomEvent}>Random</StyledSearchButton>
           </StyledSearchButtonBox>
         </StyledSearchBoxInput>
 
@@ -280,7 +280,7 @@ const Home: NextPage = () => {
 
       <StyledtutorialBox>
         <StyledtutorialText
-          href="https://meta-network.vercel.app"
+          href={process.env.NEXT_PUBLIC_META_NETWORK_URL}
           target="_blank" rel="noopener noreferrer">【Guide】Build your owner Meta space in 5 minutes</StyledtutorialText>
       </StyledtutorialBox>
 
