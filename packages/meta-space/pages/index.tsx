@@ -49,6 +49,10 @@ const Home: NextPage = () => {
       if (data) {
         setTearchResultList(data)
       }
+
+      if (!isEmpty(data)) {
+        handleHistory(value)
+      }
     },
     { wait: 300 },
   )
@@ -61,7 +65,6 @@ const Home: NextPage = () => {
     const value = trim(e.target.value)
     setSearchValue(value)
     if (value) {
-      handleHistory(value)
       fetchSearchResult(value)
     }
   }
@@ -121,8 +124,6 @@ const Home: NextPage = () => {
    * 处理搜索回车
    */
   const handleSearch = (value: string) => {
-    console.log(value)
-    handleHistory(value)
     fetchSearchResult(value)
   }
 
@@ -170,7 +171,6 @@ const Home: NextPage = () => {
     if (data) {
       const value = data.metaSpacePrefix
       setSearchValue(value)
-      handleHistory(value)
       fetchSearchResult(value)
     }
   }
