@@ -178,16 +178,16 @@ const Home: NextPage = () => {
   /**
    * vist click
    */
-  const handleVistEvent = () => {
+  const handleVisitEvent = () => {
     if (!searchValue) {
-      message.info('请输入搜索内容')
+      message.info('Enter search content')
       return
     }
 
     if (!isEmpty(searchResultList) && searchResultList[0].domain) {
       window.open(`https://${searchResultList[0].domain}`, '_blank')
     } else {
-      message.info('没有可以跳转的地址')
+      message.info('No address to jump')
     }
   }
 
@@ -215,7 +215,7 @@ const Home: NextPage = () => {
           </StyledSearch>
           <StyledSearchButtonBox>
             <StyledSearchButton icon={<ArrowRightOutlined />}
-              onClick={handleVistEvent}>Vist</StyledSearchButton>
+              onClick={handleVisitEvent}>Visit</StyledSearchButton>
             <StyledSearchButton
               loading={loadingRandom}
               icon={<StyledHeadDiceIcon />}
