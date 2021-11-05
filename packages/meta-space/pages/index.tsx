@@ -1,8 +1,8 @@
-import React, { useMemo, useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import type { NextPage } from 'next'
 import { Button, Input, Empty, Select, message, Image } from 'antd'
 import styled from 'styled-components'
-import { AudioOutlined, ArrowRightOutlined, CloseOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined } from '@ant-design/icons'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { HexagonIcon, DiceIcon } from '../components/Icon/Index'
 import { FetchDomainFindAPI, FetchSiteConfigRandomAPI } from '../helpers/index'
@@ -224,7 +224,7 @@ const Home: NextPage = () => {
         <animated.div style={LogoAnimatedStyles}>
           <StyledHeadIcon></StyledHeadIcon>
         </animated.div>
-        
+
         <StyledHeadTitleBox style={LogoTextAnimatedStyles}>
           <StyledHeadSub style={LogoTextTagAnimatedStyles}>{t('launcher')}</StyledHeadSub>
           <StyledHeadTitle>Meta Space</StyledHeadTitle>
