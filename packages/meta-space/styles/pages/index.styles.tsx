@@ -6,16 +6,20 @@ export const StyledSearchList = styled.ul`
   padding: 0;
   margin: 10px 0 0 0;
   width: 280px;
+  background-color: #302458;
+  border-radius: 4px;
+  border: 1px solid #00f3fd;
 `
 export const StyledSearchListLink = styled.a`
   display: flex;
   align-items: center;
-  color: #333;
-  padding: 6px 4px;
+  color: #fff;
+  padding: 8px 10px;
   font-size: 14px;
   &:hover {
-    color: #333;
-    background-color: #f5f5f5;
+    color: #fff;
+    background-color: #3f2f72;
+    border-radius: 4px;
   }
 `
 export const StyledSearchListText = styled.span`

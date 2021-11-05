@@ -64,19 +64,23 @@ const StyledLinkLogo = styled.section`
   }
 `
 const StyledLink = styled.a`
-  padding: 0;
+  padding: 8px 10px;
   margin: 10px 10px 0 10px;
   display: flex;
   align-items: center;
+  background: #302458;
+  border: 1px solid #00f3fd;
+  border-radius: 4px;
 `
 
 const StyledLinkText = styled.span`
   font-size: 14px;
-  color: #595959;
+  /* color: #595959; */
+  color: #fff;
   font-weight: 400;
   margin-left: 4px;
   &:hover {
-    color: #333;
+    color: #fff;
   }
   @media screen and (max-width: 768px) {
     font-size: 12px;

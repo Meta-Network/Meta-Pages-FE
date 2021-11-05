@@ -62,7 +62,7 @@ export const StyledItemWrapper = styled.li`
   align-items: center;
   font-size: 14px;
   cursor: pointer;
-  color: #333;
+  color: #fff;
   .anticon {
     font-size: 16px;
     margin-right: 4px;
