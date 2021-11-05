@@ -10,6 +10,7 @@ import { StoreGet, StoreSet } from '../utils/store'
 import { isEmpty, cloneDeep, trim } from 'lodash'
 import { useMount, useDebounceFn } from 'ahooks'
 import { useTranslation } from 'next-i18next'
+import { useSpring, animated, useSpringRef, useChain } from 'react-spring'
 import HistoryList from '../components/HistoryList/Index'
 import MediaLink from '../components/MediaLink/Index'
 
@@ -35,6 +36,25 @@ const Home: NextPage = () => {
   // 当前选择值
   const [selectValue, setSelectValue] = useState<'result' | 'history'>('result')
   const [loadingRandom, setLoadingRandom] = useState<boolean>(false)
+
+  const LogoAnimatedStyles = useSpring({
+    from: { opacity: 0, x: -10 },
+    to: { opacity: 1, x: 0 },
+  })
+  const LogoTextAnimatedStylesSpringRef = useSpringRef()
+  const LogoTextAnimatedStyles = useSpring({
+    from: { opacity: 0, x: 10 },
+    to: { opacity: 1, x: 0 },
+    delay: 400,
+    ref: LogoTextAnimatedStylesSpringRef,
+  })
+  const LogoTextTagAnimatedStylesSpringRef = useSpringRef()
+  const LogoTextTagAnimatedStyles = useSpring({
+    from: { opacity: 0, y: 10 },
+    to: { opacity: 1, y: 0 },
+    ref: LogoTextTagAnimatedStylesSpringRef
+  })
+  useChain([LogoTextAnimatedStylesSpringRef, LogoTextTagAnimatedStylesSpringRef])
 
   /**
    * 获取搜索结果
@@ -201,9 +221,12 @@ const Home: NextPage = () => {
       <HeaderCustom></HeaderCustom>
 
       <StyledHead>
-        <StyledHeadIcon></StyledHeadIcon>
-        <StyledHeadTitleBox>
-          <StyledHeadSub>{t('launcher')}</StyledHeadSub>
+        <animated.div style={LogoAnimatedStyles}>
+          <StyledHeadIcon></StyledHeadIcon>
+        </animated.div>
+        
+        <StyledHeadTitleBox style={LogoTextAnimatedStyles}>
+          <StyledHeadSub style={LogoTextTagAnimatedStyles}>{t('launcher')}</StyledHeadSub>
           <StyledHeadTitle>Meta Space</StyledHeadTitle>
         </StyledHeadTitleBox>
       </StyledHead>
@@ -331,7 +354,7 @@ const StyledHeadDiceIcon = styled(DiceIcon)`
   width: 16px;
   height: 16px;
 `
-const StyledHeadTitleBox = styled.section`
+const StyledHeadTitleBox = styled(animated.section)`
   position: relative;
   margin-left: 10px;
 `
@@ -347,7 +370,7 @@ const StyledHeadTitle = styled.h1`
     font-size: 30px;
   }
 `
-const StyledHeadSub = styled.span`
+const StyledHeadSub = styled(animated.span)`
   background: #16adf3;
   display: inline-block;
   color: #fff;
