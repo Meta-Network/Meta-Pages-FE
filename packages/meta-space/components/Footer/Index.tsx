@@ -1,10 +1,13 @@
 import React from 'react'
 import styled from 'styled-components'
+import { useTranslation } from 'next-i18next'
 
 const Footer: React.FC = () => {
+  const { t } = useTranslation('common')
+
   return (
     <StyledFooter>
-      <p>© 2021 Meta Network All Rights Served</p>
+      <p>{t('footer-copyright')}</p>
     </StyledFooter>
   )
 }
@@ -26,4 +29,5 @@ const StyledFooter = styled.section`
     }
   }
 `
+
 export default Footer

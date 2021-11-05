@@ -1,20 +1,22 @@
 import React, { useMemo, useState, useCallback } from 'react'
 import type { NextPage } from 'next'
-import { Button, Input, Empty, Select, message } from 'antd'
+import { Button, Input, Empty, Select, message, Image } from 'antd'
 import styled from 'styled-components'
 import { AudioOutlined, ArrowRightOutlined, CloseOutlined } from '@ant-design/icons'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { HexagonIcon, DiceIcon } from '../components/Icon/Index'
 import { FetchDomainFindAPI, FetchSiteConfigRandomAPI } from '../helpers/index'
 import { StoreGet, StoreSet } from '../utils/store'
 import { isEmpty, cloneDeep, trim } from 'lodash'
 import { useMount, useDebounceFn } from 'ahooks'
+import { useTranslation } from 'next-i18next'
 import HistoryList from '../components/HistoryList/Index'
 import MediaLink from '../components/MediaLink/Index'
 
 import Footer from '../components/Footer/Index'
 import { DomainData } from '../typings/cms'
 import { HistoryListState } from '../typings'
-
+import HeaderCustom from '../components/HeaderCustom/Index'
 
 const { Search } = Input
 const { Option } = Select
@@ -22,6 +24,8 @@ const { Option } = Select
 const KeyMetaSpaceHistory = 'MetaSpaceHistory'
 
 const Home: NextPage = () => {
+  const { t } = useTranslation('common')
+
   // 搜索结果列表
   const [searchResultList, setTearchResultList] = useState<DomainData[]>([])
   // 搜索历史列表
@@ -187,16 +191,19 @@ const Home: NextPage = () => {
     if (!isEmpty(searchResultList) && searchResultList[0].domain) {
       window.open(`https://${searchResultList[0].domain}`, '_blank')
     } else {
-      message.info('No address to jump')
+      message.info(t('no-address-to-jump'))
     }
   }
 
   return (
     <StyledWrapper>
+
+      <HeaderCustom></HeaderCustom>
+
       <StyledHead>
         <StyledHeadIcon></StyledHeadIcon>
         <StyledHeadTitleBox>
-          <StyledHeadSub>Launcher</StyledHeadSub>
+          <StyledHeadSub>{t('launcher')}</StyledHeadSub>
           <StyledHeadTitle>Meta Space</StyledHeadTitle>
         </StyledHeadTitleBox>
       </StyledHead>
@@ -206,7 +213,7 @@ const Home: NextPage = () => {
         <StyledSearchBoxInput>
           <StyledSearch>
             <StyledSearchInput
-              placeholder="Sub Domain"
+              placeholder={t('sub-domain')}
               style={{ width: 240 }}
               onSearch={handleSearch}
               onChange={e => handleSearchChange(e)}
@@ -215,11 +222,11 @@ const Home: NextPage = () => {
           </StyledSearch>
           <StyledSearchButtonBox>
             <StyledSearchButton icon={<ArrowRightOutlined />}
-              onClick={handleVisitEvent}>Visit</StyledSearchButton>
+              onClick={handleVisitEvent}>{t('visit')}</StyledSearchButton>
             <StyledSearchButton
               loading={loadingRandom}
               icon={<StyledHeadDiceIcon />}
-              onClick={handleRandomEvent}>Random</StyledSearchButton>
+              onClick={handleRandomEvent}>{t('random')}</StyledSearchButton>
           </StyledSearchButtonBox>
         </StyledSearchBoxInput>
 
@@ -231,8 +238,8 @@ const Home: NextPage = () => {
                 dropdownClassName="1"
                 className="custom-search-select"
               >
-                <Option value="result">Result</Option>
-                <Option value="history">History</Option>
+                <Option value="result">{t('result')}</Option>
+                <Option value="history">{t('history')}</Option>
               </StyledSearchSelect>
 
               {
@@ -243,7 +250,11 @@ const Home: NextPage = () => {
                         searchResultList.map((i, key) => (
                           <li key={key}>
                             <StyledSearchListLink href={`https://${i.domain}`} target="_blank" rel="noopener noreferrer">
-                              <StyledListIcon />
+                              {
+                                i.siteInfo.favicon
+                                  ? <Image src={i.siteInfo.favicon} width={26} height={26} alt={i.siteInfo.title} preview={false} style={{ objectFit: 'contain' }} />
+                                  : <StyledListIcon />
+                              }
                               <StyledSearchListText>{i.siteInfo.title} - {i.siteInfo.author}</StyledSearchListText>
                             </StyledSearchListLink>
                           </li>
@@ -268,7 +279,7 @@ const Home: NextPage = () => {
 
             </StyledSearchResult>
             : <StyledSearchResult>
-              <StyledSearchTitle>History</StyledSearchTitle>
+              <StyledSearchTitle>{t('history')}</StyledSearchTitle>
               <HistoryList
                 list={searchHistoryList}
                 handleHistoryEventClick={handleHistoryEventClick}
@@ -281,7 +292,7 @@ const Home: NextPage = () => {
       <StyledtutorialBox>
         <StyledtutorialText
           href={process.env.NEXT_PUBLIC_META_NETWORK_URL}
-          target="_blank" rel="noopener noreferrer">【Guide】Build your owner Meta space in 5 minutes</StyledtutorialText>
+          target="_blank" rel="noopener noreferrer">{t('guide-build-space')}</StyledtutorialText>
       </StyledtutorialBox>
 
       <MediaLink></MediaLink>
@@ -384,7 +395,7 @@ const StyledSearchList = styled.ul`
   list-style: none;
   padding: 0;
   margin: 10px 0 0 0;
-  width: 240px;
+  width: 280px;
 `
 const StyledSearchListLi = styled.li``
 const StyledSearchListLink = styled.a`
@@ -406,9 +417,9 @@ const StyledSearchListText = styled.span`
 `
 
 const StyledListIcon = styled(HexagonIcon)`
-  width: 20px;
-  height: 20px;
-  flex: 0 0 20px;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
 `
 const StyledListDeleteIcon = styled(CloseOutlined)`
   margin-left: auto;
@@ -480,5 +491,13 @@ const StyledtutorialText = styled.a`
   }
 `
 
+export async function getStaticProps({ locale }: any) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+      // Will be passed to the page component as props
+    },
+  }
+}
 
 export default Home

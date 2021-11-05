@@ -47,7 +47,7 @@ const StyledSearchList = styled.ul`
   list-style: none;
   padding: 0;
   margin: 10px 0 0 0;
-  width: 240px;
+  width: 280px;
 `
 
 const StyledSearchListLink = styled.a`
@@ -69,9 +69,9 @@ const StyledSearchListText = styled.span`
 `
 
 const StyledListIcon = styled(HexagonIcon)`
-  width: 20px;
-  height: 20px;
-  flex: 0 0 20px;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
 `
 const StyledListDeleteIcon = styled(CloseOutlined)`
   margin-left: auto;
