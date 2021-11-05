@@ -349,7 +349,20 @@ const StyledHeadIcon = styled(HexagonIcon)`
     width: 70px;
     height: 70px;
   }
+  &:hover {
+    animation: rotate .6s;
+  }
+
+  @keyframes rotate {
+  from {
+    transform: rotate(0); 
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 `
+
 const StyledHeadDiceIcon = styled(DiceIcon)`
   width: 16px;
   height: 16px;
