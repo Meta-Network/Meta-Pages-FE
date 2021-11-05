@@ -1,9 +1,10 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Button, Input, Empty, Select } from 'antd'
+import { Empty } from 'antd'
 import { HistoryListState } from '../../typings'
 import { HexagonIcon } from '../Icon/Index'
 import { CloseOutlined } from '@ant-design/icons'
+import { StyledSearchList, StyledSearchListLink, StyledSearchListText, StyledListIcon } from '../../styles/pages/index.styles'
 
 interface Props {
   readonly list: HistoryListState[]
@@ -43,36 +44,6 @@ const HistoryList: React.FC<Props> = ({ list, handleHistoryEventClick, deleteHis
   )
 }
 
-const StyledSearchList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0 0;
-  width: 280px;
-`
-
-const StyledSearchListLink = styled.a`
-  display: flex;
-  align-items: center;
-  color: #333;
-  padding: 6px 4px;
-  font-size: 14px;
-  &:hover {
-    color: #333;
-    background-color: #f5f5f5;
-  }
-`
-const StyledSearchListText = styled.span`
-  margin-left: 10px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-`
-
-const StyledListIcon = styled(HexagonIcon)`
-  width: 26px;
-  height: 26px;
-  flex: 0 0 26px;
-`
 const StyledListDeleteIcon = styled(CloseOutlined)`
   margin-left: auto;
 `

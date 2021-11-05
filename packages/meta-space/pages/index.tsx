@@ -13,11 +13,11 @@ import { useTranslation } from 'next-i18next'
 import { useSpring, animated, useSpringRef, useChain } from 'react-spring'
 import HistoryList from '../components/HistoryList/Index'
 import MediaLink from '../components/MediaLink/Index'
-
 import Footer from '../components/Footer/Index'
 import { DomainData } from '../typings/cms'
 import { HistoryListState } from '../typings'
 import HeaderCustom from '../components/HeaderCustom/Index'
+import { StyledSearchList, StyledSearchListLink, StyledSearchListText, StyledListIcon } from '../styles/pages/index.styles'
 
 const { Search } = Input
 const { Option } = Select
@@ -427,39 +427,7 @@ const StyledSearchSelect = styled(Select)`
 const StyledSearchTitle = styled.span`
   font-size: 14px;
 `
-const StyledSearchList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0 0;
-  width: 280px;
-`
-const StyledSearchListLi = styled.li``
-const StyledSearchListLink = styled.a`
-  display: flex;
-  align-items: center;
-  color: #333;
-  padding: 6px 4px;
-  font-size: 14px;
-  &:hover {
-    color: #333;
-    background-color: #f5f5f5;
-  }
-`
-const StyledSearchListText = styled.span`
-  margin-left: 10px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-`
 
-const StyledListIcon = styled(HexagonIcon)`
-  width: 26px;
-  height: 26px;
-  flex: 0 0 26px;
-`
-const StyledListDeleteIcon = styled(CloseOutlined)`
-  margin-left: auto;
-`
 
 const StyledSearch = styled.section`
   display: flex;
