@@ -310,7 +310,7 @@ const StyledWrapper = styled.section`
 const StyledHead = styled.section`
   width: 780px;
   margin: 0 auto;
-  padding-top: 120px;
+  padding-top: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
