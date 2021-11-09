@@ -1,19 +1,23 @@
-import React, { useMemo, useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import type { NextPage } from 'next'
-import { Button, Input, Empty, Select, message } from 'antd'
+import { Button, Input, Empty, Select, message, Image } from 'antd'
 import styled from 'styled-components'
-import { AudioOutlined, ArrowRightOutlined, CloseOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined } from '@ant-design/icons'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { HexagonIcon, DiceIcon } from '../components/Icon/Index'
 import { FetchDomainFindAPI, FetchSiteConfigRandomAPI } from '../helpers/index'
 import { StoreGet, StoreSet } from '../utils/store'
 import { isEmpty, cloneDeep, trim } from 'lodash'
 import { useMount, useDebounceFn } from 'ahooks'
+import { useTranslation } from 'next-i18next'
+import { useSpring, animated, useSpringRef, useChain } from 'react-spring'
 import HistoryList from '../components/HistoryList/Index'
 import MediaLink from '../components/MediaLink/Index'
-
 import Footer from '../components/Footer/Index'
 import { DomainData } from '../typings/cms'
 import { HistoryListState } from '../typings'
+import HeaderCustom from '../components/HeaderCustom/Index'
+import { StyledSearchList, StyledSearchListLink, StyledSearchListText, StyledListIcon } from '../styles/pages/index.styles'
 
 
 const { Search } = Input
@@ -22,6 +26,8 @@ const { Option } = Select
 const KeyMetaSpaceHistory = 'MetaSpaceHistory'
 
 const Home: NextPage = () => {
+  const { t } = useTranslation('common')
+
   // 搜索结果列表
   const [searchResultList, setTearchResultList] = useState<DomainData[]>([])
   // 搜索历史列表
@@ -31,6 +37,25 @@ const Home: NextPage = () => {
   // 当前选择值
   const [selectValue, setSelectValue] = useState<'result' | 'history'>('result')
   const [loadingRandom, setLoadingRandom] = useState<boolean>(false)
+
+  const LogoAnimatedStyles = useSpring({
+    from: { opacity: 0, x: -10 },
+    to: { opacity: 1, x: 0 },
+  })
+  const LogoTextAnimatedStylesSpringRef = useSpringRef()
+  const LogoTextAnimatedStyles = useSpring({
+    from: { opacity: 0, x: 10 },
+    to: { opacity: 1, x: 0 },
+    delay: 400,
+    ref: LogoTextAnimatedStylesSpringRef,
+  })
+  const LogoTextTagAnimatedStylesSpringRef = useSpringRef()
+  const LogoTextTagAnimatedStyles = useSpring({
+    from: { opacity: 0, y: 10 },
+    to: { opacity: 1, y: 0 },
+    ref: LogoTextTagAnimatedStylesSpringRef
+  })
+  useChain([LogoTextAnimatedStylesSpringRef, LogoTextTagAnimatedStylesSpringRef])
 
   /**
    * 获取搜索结果
@@ -49,6 +74,10 @@ const Home: NextPage = () => {
       if (data) {
         setTearchResultList(data)
       }
+
+      if (!isEmpty(data)) {
+        handleHistory(value)
+      }
     },
     { wait: 300 },
   )
@@ -61,7 +90,6 @@ const Home: NextPage = () => {
     const value = trim(e.target.value)
     setSearchValue(value)
     if (value) {
-      handleHistory(value)
       fetchSearchResult(value)
     }
   }
@@ -121,8 +149,6 @@ const Home: NextPage = () => {
    * 处理搜索回车
    */
   const handleSearch = (value: string) => {
-    console.log(value)
-    handleHistory(value)
     fetchSearchResult(value)
   }
 
@@ -170,7 +196,6 @@ const Home: NextPage = () => {
     if (data) {
       const value = data.metaSpacePrefix
       setSearchValue(value)
-      handleHistory(value)
       fetchSearchResult(value)
     }
   }
@@ -178,25 +203,31 @@ const Home: NextPage = () => {
   /**
    * vist click
    */
-  const handleVistEvent = () => {
+  const handleVisitEvent = () => {
     if (!searchValue) {
-      message.info('请输入搜索内容')
+      message.info('Enter search content')
       return
     }
 
     if (!isEmpty(searchResultList) && searchResultList[0].domain) {
-      window.open(`https://${searchResultList[0].domain}`)
+      window.open(`https://${searchResultList[0].domain}`, '_blank')
     } else {
-      message.info('没有可以跳转的地址')
+      message.info(t('no-address-to-jump'))
     }
   }
 
   return (
     <StyledWrapper>
+
+      <HeaderCustom></HeaderCustom>
+
       <StyledHead>
-        <StyledHeadIcon></StyledHeadIcon>
-        <StyledHeadTitleBox>
-          <StyledHeadSub>Launcher</StyledHeadSub>
+        <animated.div style={LogoAnimatedStyles}>
+          <StyledHeadIcon></StyledHeadIcon>
+        </animated.div>
+
+        <StyledHeadTitleBox style={LogoTextAnimatedStyles}>
+          <StyledHeadSub style={LogoTextTagAnimatedStyles}>{t('launcher')}</StyledHeadSub>
           <StyledHeadTitle>Meta Space</StyledHeadTitle>
         </StyledHeadTitleBox>
       </StyledHead>
@@ -206,7 +237,7 @@ const Home: NextPage = () => {
         <StyledSearchBoxInput>
           <StyledSearch>
             <StyledSearchInput
-              placeholder="Sub Domain"
+              placeholder={t('sub-domain')}
               style={{ width: 240 }}
               onSearch={handleSearch}
               onChange={e => handleSearchChange(e)}
@@ -215,11 +246,12 @@ const Home: NextPage = () => {
           </StyledSearch>
           <StyledSearchButtonBox>
             <StyledSearchButton icon={<ArrowRightOutlined />}
-              onClick={handleVistEvent}>Vist</StyledSearchButton>
+              onClick={handleVisitEvent} ghost>{t('visit')}</StyledSearchButton>
             <StyledSearchButton
+              ghost
               loading={loadingRandom}
               icon={<StyledHeadDiceIcon />}
-              onClick={handleRandomEvent}>Random</StyledSearchButton>
+              onClick={handleRandomEvent}>{t('random')}</StyledSearchButton>
           </StyledSearchButtonBox>
         </StyledSearchBoxInput>
 
@@ -227,48 +259,49 @@ const Home: NextPage = () => {
         {
           searchValue
             ? <StyledSearchResult>
-              <StyledSearchSelect value={selectValue} defaultValue="result" style={{ width: 120 }} onChange={(v: any) => setSelectValue(v)}
-                dropdownClassName="1"
-                className="custom-search-select"
-              >
-                <Option value="result">Result</Option>
-                <Option value="history">History</Option>
-              </StyledSearchSelect>
+                <StyledSearchSelect value={selectValue} defaultValue="result" style={{ width: 120 }} onChange={(v: any) => setSelectValue(v)}
+                  dropdownClassName="1"
+                  className="custom-search-select"
+                >
+                  <Option value="result">{t('result')}</Option>
+                  <Option value="history">{t('history')}</Option>
+                </StyledSearchSelect>
+                {
+                  selectValue === 'result'
+                    ? <>
+                      <StyledSearchList>
+                        {
+                          searchResultList.map((i, key) => (
+                            <li key={key}>
+                              <StyledSearchListLink href={`https://${i.domain}`} target="_blank" rel="noopener noreferrer">
+                                {
+                                  i.siteInfo.favicon
+                                    ? <Image src={i.siteInfo.favicon} width={26} height={26} alt={i.siteInfo.title} preview={false} style={{ objectFit: 'contain' }} />
+                                    : <StyledListIcon />
+                                }
+                                <StyledSearchListText>{i.siteInfo.title} - {i.siteInfo.author}</StyledSearchListText>
+                              </StyledSearchListLink>
+                            </li>
+                          ))
+                        }
 
-              {
-                selectValue === 'result'
-                  ? <>
-                    <StyledSearchList>
-                      {
-                        searchResultList.map((i, key) => (
-                          <li key={key}>
-                            <StyledSearchListLink href={`https://${i.domain}`} target="_blank" rel="noopener noreferrer">
-                              <StyledListIcon />
-                              <StyledSearchListText>{i.siteInfo.title} - {i.siteInfo.author}</StyledSearchListText>
-                            </StyledSearchListLink>
-                          </li>
-                        ))
-                      }
-
-                      {
-                        searchResultList.length <= 0
-                          ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
-                          : null
-                      }
-                    </StyledSearchList>
-                  </>
-                  : selectValue === 'history'
-                    ? <HistoryList
-                      list={searchHistoryList}
-                      handleHistoryEventClick={handleHistoryEventClick}
-                      deleteHistory={deleteHistory}></HistoryList>
-                    : null
-              }
-
-
-            </StyledSearchResult>
+                        {
+                          searchResultList.length <= 0
+                            ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                            : null
+                        }
+                      </StyledSearchList>
+                    </>
+                    : selectValue === 'history'
+                      ? <HistoryList
+                        list={searchHistoryList}
+                        handleHistoryEventClick={handleHistoryEventClick}
+                        deleteHistory={deleteHistory}></HistoryList>
+                      : null
+                }
+              </StyledSearchResult>
             : <StyledSearchResult>
-              <StyledSearchTitle>History</StyledSearchTitle>
+              <StyledSearchTitle>{t('history')}</StyledSearchTitle>
               <HistoryList
                 list={searchHistoryList}
                 handleHistoryEventClick={handleHistoryEventClick}
@@ -281,7 +314,7 @@ const Home: NextPage = () => {
       <StyledtutorialBox>
         <StyledtutorialText
           href={process.env.NEXT_PUBLIC_META_NETWORK_URL}
-          target="_blank" rel="noopener noreferrer">【Guide】Build your owner Meta space in 5 minutes</StyledtutorialText>
+          target="_blank" rel="noopener noreferrer">{t('guide-build-space')}&nbsp;&nbsp;</StyledtutorialText>
       </StyledtutorialBox>
 
       <MediaLink></MediaLink>
@@ -299,7 +332,7 @@ const StyledWrapper = styled.section`
 const StyledHead = styled.section`
   width: 780px;
   margin: 0 auto;
-  padding-top: 120px;
+  padding-top: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -311,16 +344,30 @@ const StyledHead = styled.section`
 const StyledHeadIcon = styled(HexagonIcon)`
   width: 100px;
   height: 100px;
+  color: #fff;
   @media screen and (max-width: 768px) {
     width: 70px;
     height: 70px;
   }
+  &:hover {
+    animation: rotate .6s;
+  }
+
+  @keyframes rotate {
+  from {
+    transform: rotate(0); 
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 `
+
 const StyledHeadDiceIcon = styled(DiceIcon)`
   width: 16px;
   height: 16px;
 `
-const StyledHeadTitleBox = styled.section`
+const StyledHeadTitleBox = styled(animated.section)`
   position: relative;
   margin-left: 10px;
 `
@@ -332,11 +379,12 @@ const StyledHeadTitle = styled.h1`
   font-weight: bold;
   letter-spacing: 2px;
   word-spacing: 6px;
+  color: #fff;
   @media screen and (max-width: 768px) {
     font-size: 30px;
   }
 `
-const StyledHeadSub = styled.span`
+const StyledHeadSub = styled(animated.span)`
   background: #16adf3;
   display: inline-block;
   color: #fff;
@@ -370,8 +418,14 @@ const StyledSearchResult = styled.section`
   margin-top: 20px;
 `
 const StyledSearchSelect = styled(Select)`
+
   .ant-select-selector {
+    background-color: transparent !important;
+    color: #fff;
     border: none !important;
+  }
+  .ant-select-arrow {
+    color: #fff;
   }
   &.ant-select-focused:not(.ant-select-disabled).ant-select:not(.ant-select-customize-input) .ant-select-selector {
     box-shadow: none;
@@ -379,40 +433,9 @@ const StyledSearchSelect = styled(Select)`
 `
 const StyledSearchTitle = styled.span`
   font-size: 14px;
-`
-const StyledSearchList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0 0;
-  width: 240px;
-`
-const StyledSearchListLi = styled.li``
-const StyledSearchListLink = styled.a`
-  display: flex;
-  align-items: center;
-  color: #333;
-  padding: 6px 4px;
-  font-size: 14px;
-  &:hover {
-    color: #333;
-    background-color: #f5f5f5;
-  }
-`
-const StyledSearchListText = styled.span`
-  margin-left: 10px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
+  color: #fff;
 `
 
-const StyledListIcon = styled(HexagonIcon)`
-  width: 20px;
-  height: 20px;
-  flex: 0 0 20px;
-`
-const StyledListDeleteIcon = styled(CloseOutlined)`
-  margin-left: auto;
-`
 
 const StyledSearch = styled.section`
   display: flex;
@@ -424,10 +447,21 @@ const StyledSearch = styled.section`
 `
 
 const StyledSearchInput = styled(Search)`
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #fff;
+  .ant-input {
+    color: #fff;
+  }
   .ant-btn,
   .ant-input {
     border: none;
+  }
+  .ant-btn {
+    color: #fff !important;
+  }
+  .ant-btn,
+  .ant-input-group-addon,
+  .ant-input {
+    background-color: transparent;
   }
   .ant-input:focus, .ant-input-focused {
     box-shadow: none;
@@ -440,7 +474,7 @@ const StyledSearchUrl = styled.span`
   font-size: 16px;
   font-weight: 400;
   line-height: 1.2;
-  color: #333;
+  color: #fff;
   letter-spacing: 1px;
 `
 const StyledSearchButtonBox = styled.section`
@@ -468,11 +502,15 @@ const StyledtutorialBox = styled.section`
   }
 `
 const StyledtutorialText = styled.a`
-  color: #595959;
+  color: #fff;
   text-decoration: underline;
   font-size: 14px;
+  background: #302458;
+  border: 1px solid #00f3fd;
+  border-radius: 4px;
+  padding: 10px;
   &:hover {
-    color: #333;
+    color: #fff;
     text-decoration: underline;
   }
   @media screen and (max-width: 768px) {
@@ -480,5 +518,13 @@ const StyledtutorialText = styled.a`
   }
 `
 
+export async function getStaticProps({ locale }: any) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+      // Will be passed to the page component as props
+    },
+  }
+}
 
 export default Home
