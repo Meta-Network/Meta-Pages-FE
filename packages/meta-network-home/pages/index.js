@@ -7,6 +7,8 @@ export default function Home() {
       <Head>
         <title>Meta Network Incoming!</title>
         <link rel="icon" href="/favicon.ico" />
+        <link rel="preload" href="/images/background.png" as="image" />
+        <link rel="preload" href="/images/card.png" as="image" />
       </Head>
 
       <main>
