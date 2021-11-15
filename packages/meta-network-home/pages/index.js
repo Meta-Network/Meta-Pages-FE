@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="container">
       <Head>
-        <title>Meta Network Incoming!</title>
+        <title>Meta Network</title>
         <link rel="icon" href="/favicon.ico" />
         <link rel="preload" href="/images/background.png" as="image" />
         <link rel="preload" href="/images/card.png" as="image" />
@@ -22,8 +22,23 @@ export default function Home() {
           </h1>
 
           <div className="description">
-            <p>2021·11·22 ｜19:00～21:00 (GMT+8)</p>
-            <p>正式发布</p>
+            <p>
+              <span>
+                2021·11·22 ｜19:00～21:00 (GMT+8)
+              </span>
+            </p>
+            <p>
+              <span style={{
+                verticalAlign: 'middle',
+              }}>
+                正式发布
+              </span>
+              <a href="https://www.metanetwork.online/" target="__blank">
+                <button className="to-meta-network">
+                  抢先占领
+                </button>
+              </a>
+            </p>
             <p style={{ marginTop: 20 }}>
               <a href="https://www.matataki.io/" target="__blank" style={{ paddingRight: 15 }}>
                 <img className="logo-link" src="/images/logos/matataki.png" />
@@ -31,11 +46,18 @@ export default function Home() {
               <a href="https://www.meta.io/" target="__blank">
                 <img className="logo-link" src="/images/logos/meta-io.png" />
               </a>
+
             </p>
           </div>
         </card>
 
-        <card style={{marginRight: '10vw'}}>
+        <card className="rightCard">
+          <span className="extra-text-inner">
+            YOU
+          </span>
+          <span className="extra-text-outer">
+            WHO ARE
+          </span>
           <Image
             priority
             width={850}
@@ -99,6 +121,12 @@ export default function Home() {
           position: relative;
           margin-right: -3vw;
         }
+        
+        .rightCard {
+          margin-right: 10vw;
+          position: relative;
+          display: inline-block;
+        }
 
         .description {
           display: flex;
@@ -127,6 +155,63 @@ export default function Home() {
         .brand-logo {
           max-width: 6.5vw;
           padding: 0 1vw;
+        }
+        
+        .extra-text-inner {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          font-size: 3.4vw;
+          margin-left: 16.4vw;
+          margin-top: -2.7vw;
+        }
+        
+        .extra-text-outer {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          font-size: 2.4vw;
+          margin-left: 14vw;
+          margin-top: 5.6vw;
+          z-index: 1;
+        }
+        
+        .to-meta-network {
+          margin-left: 2vw;
+          vertical-align: middle;
+          min-width: 130px;
+          height: 40px;
+          color: black;
+          padding: 5px 10px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          display: inline-block;
+          outline: none;
+          overflow: hidden;
+          border-radius: 5px;
+          border: none;
+          background-color: rgb(218, 254, 96);
+        }
+        .to-meta-network:hover {
+          border-radius: 5px;
+          padding-right: 24px;
+          padding-left:8px;
+        }
+        .to-meta-network:hover:after {
+          opacity: 1;
+          right: 10px;
+        }
+        .to-meta-network:after {
+          content: '»';
+          position: absolute;
+          opacity: 0;
+          font-size: 20px;
+          line-height: 40px;
+          top: 0;
+          right: -20px;
+          transition: 0.4s;
         }
       `}</style>
 
