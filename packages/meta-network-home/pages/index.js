@@ -158,20 +158,20 @@ export default function Home() {
         }
         
         .extra-text-inner {
-          position: fixed;
+          position: absolute;
           top: 50%;
           left: 50%;
           font-size: 3.4vw;
-          margin-left: 16.4vw;
-          margin-top: -2.7vw;
+          margin-left: -3.57vw;
+          margin-top: -2.6vw;
         }
         
         .extra-text-outer {
-          position: fixed;
+          position: absolute;
           top: 50%;
           left: 50%;
           font-size: 2.4vw;
-          margin-left: 14vw;
+          margin-left: -5.5vw;
           margin-top: 5.6vw;
           z-index: 1;
         }
