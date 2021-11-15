@@ -9,7 +9,7 @@ import { useRouter } from 'next/router'
 import { LanguageProps } from '../../typings/i18n.d'
 import { setCookie } from '../../utils/cookie'
 
-const languageList = ['zh-CN', 'en-US']
+const languageList = ['en-US', 'zh-CN']
 const COOKIE_NEXT_LOCALE = 'NEXT_LOCALE'
 const COOKIE_NEXT_LOCALE_EXPIRES = 365
 
