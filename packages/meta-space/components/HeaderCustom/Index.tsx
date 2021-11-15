@@ -7,8 +7,11 @@ import { GlobalOutlined } from '@ant-design/icons'
 import { useTranslation } from 'next-i18next'
 import { useRouter } from 'next/router'
 import { LanguageProps } from '../../typings/i18n.d'
+import { setCookie } from '../../utils/cookie'
 
 const languageList = ['zh-CN', 'en-US']
+const COOKIE_NEXT_LOCALE = 'NEXT_LOCALE'
+const COOKIE_NEXT_LOCALE_EXPIRES = 365
 
 const HeaderCustom: FC = () => {
   const { t } = useTranslation('common')
@@ -20,7 +23,7 @@ const HeaderCustom: FC = () => {
     <Menu>
       {
         languageList.map((i, idx) => (
-          <Menu.Item key={idx}>
+          <Menu.Item key={idx} onClick={() => setCookie(COOKIE_NEXT_LOCALE, i, COOKIE_NEXT_LOCALE_EXPIRES)}>
             <Link
               href='/'
               passHref

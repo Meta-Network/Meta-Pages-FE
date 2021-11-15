@@ -37,7 +37,7 @@ const HistoryList: React.FC<Props> = ({ list, handleHistoryEventClick, deleteHis
       }
       {
         list.length <= 0
-          ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          ? <StyledEmpty image={Empty.PRESENTED_IMAGE_SIMPLE} />
           : null
       }
     </StyledSearchList>
@@ -46,6 +46,12 @@ const HistoryList: React.FC<Props> = ({ list, handleHistoryEventClick, deleteHis
 
 const StyledListDeleteIcon = styled(CloseOutlined)`
   margin-left: auto;
+`
+
+const StyledEmpty = styled(Empty)`
+  .ant-empty-description {
+    color: #fff;
+  }
 `
 
 export default HistoryList
