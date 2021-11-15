@@ -36,7 +36,8 @@ const Item: React.FC<Props> = ({ list, isDelete = false, saveHistory, deleteHist
               <StyledSearchListText>{i.siteInfo.title} - {i.siteInfo.author}</StyledSearchListText>
               {
                 isDelete && <StyledListDeleteIcon onClick={e => {
-                  e.stopPropagation
+                  e.stopPropagation()
+                  e.preventDefault()
                   deleteHistory(i)
                 }} />
               }
