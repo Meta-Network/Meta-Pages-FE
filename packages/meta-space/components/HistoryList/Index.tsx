@@ -4,7 +4,7 @@ import { Empty } from 'antd'
 import { HistoryListState } from '../../typings'
 import { HexagonIcon } from '../Icon/Index'
 import { CloseOutlined } from '@ant-design/icons'
-import { StyledSearchList, StyledSearchListLink, StyledSearchListText, StyledListIcon } from '../../styles/pages/index.styles'
+import { StyledSearchList, StyledSearchListLink, StyledSearchListText, StyledListIcon, StyledEmpty } from '../../styles/pages/index.styles'
 
 interface Props {
   readonly list: HistoryListState[]
@@ -48,10 +48,5 @@ const StyledListDeleteIcon = styled(CloseOutlined)`
   margin-left: auto;
 `
 
-const StyledEmpty = styled(Empty)`
-  .ant-empty-description {
-    color: #fff;
-  }
-`
 
 export default HistoryList

@@ -1,5 +1,8 @@
 import styled from 'styled-components'
+import { Empty } from 'antd'
+
 import { HexagonIcon } from '../../components/Icon/Index'
+
 
 export const StyledSearchList = styled.ul`
   list-style: none;
@@ -33,4 +36,10 @@ export const StyledListIcon = styled(HexagonIcon)`
   width: 26px;
   height: 26px;
   flex: 0 0 26px;
+`
+
+export const StyledEmpty = styled(Empty)`
+  .ant-empty-description {
+    color: #fff;
+  }
 `

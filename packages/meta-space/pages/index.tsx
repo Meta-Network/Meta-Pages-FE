@@ -17,7 +17,7 @@ import Footer from '../components/Footer/Index'
 import { DomainData } from '../typings/cms'
 import { HistoryListState } from '../typings'
 import HeaderCustom from '../components/HeaderCustom/Index'
-import { StyledSearchList, StyledSearchListLink, StyledSearchListText, StyledListIcon } from '../styles/pages/index.styles'
+import { StyledSearchList, StyledSearchListLink, StyledSearchListText, StyledListIcon, StyledEmpty } from '../styles/pages/index.styles'
 
 
 const { Search } = Input
@@ -287,7 +287,7 @@ const Home: NextPage = () => {
 
                         {
                           searchResultList.length <= 0
-                            ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                            ? <StyledEmpty image={Empty.PRESENTED_IMAGE_SIMPLE} />
                             : null
                         }
                       </StyledSearchList>
