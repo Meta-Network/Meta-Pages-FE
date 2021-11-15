@@ -1,4 +1,5 @@
 {
+  "name": "meta-network-home",
   "private": true,
   "scripts": {
     "dev": "next dev",
