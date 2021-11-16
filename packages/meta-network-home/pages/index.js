@@ -1,5 +1,8 @@
+// noinspection CssUnknownTarget,HtmlUnknownTarget
+
 import Head from 'next/head';
 import Image from 'next/image';
+import Footer from '../components/Footer';
 
 export default function Home() {
   return (
@@ -17,7 +20,7 @@ export default function Home() {
             <img
               className="logo-before-title"
               src="/images/logos/meta-network.png"
-            />
+             alt="Meta Network Logo" />
             <span className="colored-title">META</span> NETWORK
           </h1>
 
@@ -41,10 +44,10 @@ export default function Home() {
             </p>
             <p style={{ marginTop: 20 }}>
               <a href="https://www.matataki.io/" target="__blank" style={{ paddingRight: 15 }}>
-                <img className="logo-link" src="/images/logos/matataki.png" />
+                <img className="logo-link" src="/images/logos/matataki.png"  alt="Matataki"/>
               </a>
               <a href="https://www.meta.io/" target="__blank">
-                <img className="logo-link" src="/images/logos/meta-io.png" />
+                <img className="logo-link" src="/images/logos/meta-io.png"  alt="Meta-io"/>
               </a>
 
             </p>
@@ -52,12 +55,6 @@ export default function Home() {
         </card>
 
         <card className="rightCard">
-          <span className="extra-text-inner">
-            YOU
-          </span>
-          <span className="extra-text-outer">
-            WHO ARE
-          </span>
           <Image
             priority
             width={850}
@@ -67,18 +64,8 @@ export default function Home() {
         </card>
       </main>
 
-      <footer>
-        <img className="brand-logo" src="/images/logos/QTUM.png"/>
-        <img className="brand-logo" src="/images/logos/LD.png"/>
-        <img className="brand-logo" src="/images/logos/dForce.png"/>
-        <img className="brand-logo" src="/images/logos/MCDEX.png"/>
-        <img className="brand-logo" src="/images/logos/YFII.png"/>
-        <img className="brand-logo" src="/images/logos/NGC.png"/>
-        <img className="brand-logo" src="/images/logos/Primitive.png"/>
-        <img className="brand-logo" src="/images/logos/Cyberright.png"/>
-        <img className="brand-logo" src="/images/logos/499Block.png"/>
-        <img className="brand-logo" src="/images/logos/OGlabs.png"/>
-      </footer>
+      <Footer />
+
       <style jsx>{`
         @font-face {
           font-family: Oriya MN; src: url('oriya-mn.ttf');
@@ -142,45 +129,12 @@ export default function Home() {
           height: 3vw;
         }
         
-        footer {
-          width: 100%;
-          height: auto;
-          display: flex;
-          position: fixed;
-          bottom: 32.2px;
-          justify-content: center;
-          align-items: center;
-        }
-        
-        .brand-logo {
-          max-width: 6.5vw;
-          padding: 0 1vw;
-        }
-        
-        .extra-text-inner {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          font-size: 3.4vw;
-          margin-left: -3.57vw;
-          margin-top: -2.6vw;
-        }
-        
-        .extra-text-outer {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          font-size: 2.4vw;
-          margin-left: -5.5vw;
-          margin-top: 5.6vw;
-          z-index: 1;
-        }
-        
         .to-meta-network {
           margin-left: 2vw;
           vertical-align: middle;
-          min-width: 130px;
-          height: 40px;
+          min-width: 9vw;
+          min-height: 2.8vw;
+          font-size: 1vw;
           color: black;
           padding: 5px 10px;
           font-weight: bold;

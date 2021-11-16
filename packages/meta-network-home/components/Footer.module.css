@@ -1,0 +1,15 @@
+.footer {
+    width: 100%;
+    height: auto;
+    display: flex;
+    position: fixed;
+    bottom: 32px;
+    justify-content: center;
+    align-items: center;
+}
+
+.brandLogo {
+    max-width: 6.5vw;
+    padding: 0 1vw;
+}
+
