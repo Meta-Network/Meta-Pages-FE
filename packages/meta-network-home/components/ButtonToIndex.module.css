@@ -34,8 +34,8 @@
     content: '»';
     position: absolute;
     opacity: 0;
-    font-size: 20px;
-    line-height: 40px;
+    font-size: 1.4vw;
+    line-height: 2;
     top: 0;
     right: -20px;
     transition: 0.4s;
