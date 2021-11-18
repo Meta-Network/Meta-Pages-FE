@@ -1,4 +1,4 @@
-import styles from './ButtonToIndex.module.css'
+import styles from './ButtonToIndex.module.css';
 
 export default () => {
   return (
@@ -7,5 +7,5 @@ export default () => {
         <span>抢先占领</span>
       </button>
     </a>
-  )
-}
+  );
+};
