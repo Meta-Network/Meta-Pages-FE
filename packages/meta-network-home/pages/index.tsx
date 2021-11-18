@@ -86,13 +86,11 @@ export default function Home() {
         </div>
 
         <div className="card second-card">
-          <div className="content-card-container">
-            {isHLSActive ? (
-              <ReactHLS url={liveUrl} />
-            ) : (
-              <img className="content-card-element" src="/images/card.png" />
-            )}
-          </div>
+          {isHLSActive ? (
+            <ReactHLS className="content-card-element" url={liveUrl} />
+          ) : (
+            <img className="content-card-element" src="/images/card.png" />
+          )}
         </div>
 
         <Footer />
@@ -157,8 +155,6 @@ export default function Home() {
           box-sizing: border-box;
           display: inline-block;
           overflow: hidden;
-          width: initial;
-          height: initial;
           border: 0;
           margin: 0;
           padding: 0;
@@ -243,6 +239,18 @@ export default function Home() {
           margin: 0;
           background-size: cover;
           background-image: url('/images/background.png');
+        }
+        
+        .hls-player {
+          width: 40vw;
+          height: 22vw;
+        }
+
+        @media only screen and (max-width: 600px) {
+          .hls-player {
+            width: 80vw;
+            height: 44vw;
+          }
         }
 
         p {
