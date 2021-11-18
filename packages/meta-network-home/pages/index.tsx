@@ -1,11 +1,32 @@
 // noinspection CssUnknownTarget,HtmlUnknownTarget
 
 import Head from 'next/head';
-import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import ReactHLS from 'react-hls';
 import Footer from '../components/Footer';
 import ButtonToIndex from '../components/ButtonToIndex';
 
+const liveUrl = `https://${process.env.NEXT_PUBLIC_LIVE_HLS_DOMAIN}/live/${process.env.NEXT_PUBLIC_LIVE_HLS_SECRETS}/index.m3u8`;
+
 export default function Home() {
+  const [isHLSActive, setIsHLSActive] = useState(false);
+
+  async function checkHLSActive(url) {
+    try {
+      const res = await axios.head(url);
+      return /2\d\d/.test(res.status.toString());
+    } catch (err) {
+      console.log('err', url, err);
+      return false;
+    }
+  }
+
+  useEffect(() => {
+    checkHLSActive(liveUrl).then((result) => {
+      setIsHLSActive(result);
+    });
+  }, []);
   return (
     <div>
       <Head>
@@ -17,7 +38,7 @@ export default function Home() {
       </Head>
 
       <main>
-        <card className="first-card">
+        <div className="card first-card">
           <h1 className="title">
             <img
               className="logo-before-title"
@@ -29,43 +50,55 @@ export default function Home() {
 
           <div className="description">
             <p>
-              <span>
-                2021·11·22 ｜19:00～21:30 (GMT+8)
-              </span>
+              <span>2021·11·22 ｜19:00～21:30 (GMT+8)</span>
             </p>
             <p>
-              <span style={{
-                verticalAlign: 'middle',
-              }}>
+              <span
+                style={{
+                  verticalAlign: 'middle',
+                }}
+              >
                 正式发布
               </span>
               <ButtonToIndex />
             </p>
             <p className="description-extra">
-              <a href="https://www.matataki.io/" target="__blank" style={{ paddingRight: 15 }}>
-                <img className="logo-link" src="/images/logos/matataki.png"  alt="Matataki"/>
+              <a
+                href="https://www.matataki.io/"
+                target="__blank"
+                style={{ paddingRight: 15 }}
+              >
+                <img
+                  className="logo-link"
+                  src="/images/logos/matataki.png"
+                  alt="Matataki"
+                />
               </a>
               <a href="https://www.meta.io/" target="__blank">
-                <img className="logo-link" src="/images/logos/meta-io.png"  alt="Meta-io"/>
+                <img
+                  className="logo-link"
+                  src="/images/logos/meta-io.png"
+                  alt="Meta-io"
+                />
               </a>
             </p>
           </div>
-        </card>
+        </div>
 
-        <card className="second-card">
-          <div className="card-image-container">
-            <img
-              className="card-image"
-              src="/images/card.png"
-            />
+        <div className="card second-card">
+          <div className="content-card-container">
+            {isHLSActive ? (
+              <ReactHLS url={liveUrl} />
+            ) : (
+              <img className="content-card-element" src="/images/card.png" />
+            )}
           </div>
-        </card>
+        </div>
 
         <Footer />
       </main>
 
-
-      <style jsx preload>{`
+      <style jsx>{`
         @font-face {
           font-family: Oriya MN;
           src: url('oriya-mn.ttf');
@@ -80,7 +113,7 @@ export default function Home() {
           flex-direction: row;
         }
 
-        card {
+        .card {
           flex: 1;
           display: flex;
           flex-direction: column;
@@ -115,12 +148,12 @@ export default function Home() {
           display: inline-block;
         }
 
-        .card-image {
+        .content-card-element {
           width: 40vw;
           height: 22vw;
         }
 
-        .card-image-container {
+        .content-card-container {
           box-sizing: border-box;
           display: inline-block;
           overflow: hidden;
@@ -174,7 +207,7 @@ export default function Home() {
             align-items: center;
           }
 
-          .card-image {
+          .content-card-element {
             width: 80vw;
             height: 44vw;
           }
@@ -211,12 +244,12 @@ export default function Home() {
           background-size: cover;
           background-image: url('/images/background.png');
         }
-        
+
         p {
           padding: 0;
           margin: 0.5vw 0;
         }
       `}</style>
     </div>
-  )
+  );
 }
