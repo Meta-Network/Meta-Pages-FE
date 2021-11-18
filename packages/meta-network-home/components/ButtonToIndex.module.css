@@ -1,0 +1,54 @@
+.buttonToIndex {
+  margin-left: 2vw;
+  vertical-align: middle;
+  min-width: 9vw;
+  min-height: 2.8vw;
+  font-size: 1vw;
+  color: black;
+  padding: 5px 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: inline-block;
+  outline: none;
+  overflow: hidden;
+  border-radius: 5px;
+  border: none;
+  background-color: rgb(218, 254, 96);
+}
+
+@media only screen and (min-width: 600px) {
+  .buttonToIndex:hover {
+    border-radius: 5px;
+    padding-right: 24px;
+    padding-left: 8px;
+  }
+
+  .buttonToIndex:hover:after {
+    opacity: 1;
+    right: 10px;
+  }
+
+  .buttonToIndex:after {
+    content: '»';
+    position: absolute;
+    opacity: 0;
+    font-size: 1.4vw;
+    line-height: 2;
+    top: 0;
+    right: -20px;
+    transition: 0.4s;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .buttonToIndex {
+    font-size: 3vw;
+  }
+  .buttonToIndex::after {
+    padding-left: 5px;
+    content: '»';
+    font-size: 4vw;
+  }
+}

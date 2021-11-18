@@ -10,7 +10,11 @@
     "meta-space-dev": "lerna exec --scope meta-space -- yarn dev",
     "meta-space-lint": "lerna exec --scope meta-space -- yarn lint",
     "meta-space-build": "lerna exec --scope meta-space -- yarn build",
-    "meta-space-start": "lerna exec --scope meta-space -- yarn start"
+    "meta-space-start": "lerna exec --scope meta-space -- yarn start",
+    "meta-network-home-dev": "lerna exec --scope meta-network-home -- yarn dev",
+    "meta-network-home-lint": "lerna exec --scope meta-network-home -- yarn lint",
+    "meta-network-home-build": "lerna exec --scope meta-network-home -- yarn build",
+    "meta-network-home-start": "lerna exec --scope meta-network-home -- yarn start"
   },
   "repository": "https://github.com/Meta-Network/Meta-Pages-FE.git",
   "author": "xiaotiandada <istianlei@qq.com>",
