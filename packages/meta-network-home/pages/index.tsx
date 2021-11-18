@@ -240,7 +240,7 @@ export default function Home() {
           background-size: cover;
           background-image: url('/images/background.png');
         }
-        
+
         .hls-player {
           width: 40vw;
           height: 22vw;
