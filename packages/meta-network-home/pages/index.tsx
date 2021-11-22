@@ -44,10 +44,10 @@ export default function Home() {
       );
     }
 
-    if (process.env.NEXT_PUBLIC_CLOUD_FLARE_LIVE_URL) {
+    if (process.env.NEXT_PUBLIC_CLOUD_FLARE_LIVE_ID) {
       return (
         <iframe
-          src={process.env.NEXT_PUBLIC_CLOUD_FLARE_LIVE_URL}
+          src={`https://iframe.videodelivery.net/${process.env.NEXT_PUBLIC_CLOUD_FLARE_LIVE_ID}`}
           className="content-card-element"
           allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
           allowFullScreen={true}
