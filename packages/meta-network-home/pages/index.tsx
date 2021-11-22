@@ -1,15 +1,16 @@
 // noinspection CssUnknownTarget,HtmlUnknownTarget
 
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import ReactHlsPlayer from 'react-hls-player';
 import axios from 'axios';
-import ReactHLS from 'react-hls';
 import Footer from '../components/Footer';
 import ButtonToIndex from '../components/ButtonToIndex';
 
 const liveUrl = `https://${process.env.NEXT_PUBLIC_LIVE_HLS_DOMAIN}/live/${process.env.NEXT_PUBLIC_LIVE_HLS_SECRETS}/index.m3u8`;
 
 export default function Home() {
+  const playerRef = useRef();
   const [isHLSActive, setIsHLSActive] = useState(false);
 
   async function checkHLSActive(url) {
@@ -17,7 +18,7 @@ export default function Home() {
       const res = await axios.head(url);
       return /2\d\d/.test(res.status.toString());
     } catch (err) {
-      console.log('err', url, err);
+      console.log(`No streaming is available. Message: ${err}`);
       return false;
     }
   }
@@ -27,6 +28,43 @@ export default function Home() {
       setIsHLSActive(result);
     });
   }, []);
+
+  const GetLiveStream = () => {
+    if (isHLSActive) {
+      return (
+        <ReactHlsPlayer
+          playerRef={playerRef}
+          src={liveUrl}
+          className="content-card-element"
+          autoPlay={true}
+          controls={true}
+          width="100%"
+          height="auto"
+        />
+      );
+    }
+
+    if (process.env.NEXT_PUBLIC_CLOUD_FLARE_LIVE_ID) {
+      return (
+        <iframe
+          src={`https://iframe.videodelivery.net/${process.env.NEXT_PUBLIC_CLOUD_FLARE_LIVE_ID}`}
+          className="content-card-element"
+          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+          allowFullScreen={true}
+          id="stream-player"
+        />
+      );
+    }
+
+    return (
+      <img
+        className="content-card-element"
+        src="/images/card.png"
+        alt="banner card"
+      />
+    );
+  };
+
   return (
     <div>
       <Head>
@@ -35,6 +73,8 @@ export default function Home() {
 
         <link rel="preload" href="/images/background.png" as="image" />
         <link rel="preload" href="/images/card.png" as="image" />
+
+        <script src="https://embed.videodelivery.net/embed/sdk.latest.js" />
       </Head>
 
       <main>
@@ -86,17 +126,13 @@ export default function Home() {
         </div>
 
         <div className="card second-card">
-          {isHLSActive ? (
-            <ReactHLS className="content-card-element" url={liveUrl} />
-          ) : (
-            <img className="content-card-element" src="/images/card.png" />
-          )}
+          <GetLiveStream />
         </div>
 
         <Footer />
       </main>
 
-      <style jsx>{`
+      <style jsx global>{`
         @font-face {
           font-family: Oriya MN;
           src: url('oriya-mn.ttf');
