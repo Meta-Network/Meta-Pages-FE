@@ -1,15 +1,16 @@
 // noinspection CssUnknownTarget,HtmlUnknownTarget
 
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import ReactHLS from 'react-hls';
+import ReactHlsPlayer from 'react-hls-player';
 import Footer from '../components/Footer';
 import ButtonToIndex from '../components/ButtonToIndex';
 
 const liveUrl = `https://${process.env.NEXT_PUBLIC_LIVE_HLS_DOMAIN}/live/${process.env.NEXT_PUBLIC_LIVE_HLS_SECRETS}/index.m3u8`;
 
 export default function Home() {
+  const playerRef = useRef();
   const [isHLSActive, setIsHLSActive] = useState(false);
 
   async function checkHLSActive(url) {
@@ -23,9 +24,13 @@ export default function Home() {
   }
 
   useEffect(() => {
-    checkHLSActive(liveUrl).then((result) => {
-      setIsHLSActive(result);
-    });
+    checkHLSActive(liveUrl)
+      .then((result) => {
+        setIsHLSActive(result);
+      })
+      .catch((err) => {
+        console.log(`No streaming is available. Message: ${err}`);
+      });
   }, []);
   return (
     <div>
@@ -87,7 +92,16 @@ export default function Home() {
 
         <div className="card second-card">
           {isHLSActive ? (
-            <ReactHLS className="content-card-element" url={liveUrl} />
+            // <ReactHLS className="content-card-element" url={liveUrl} />
+            <ReactHlsPlayer
+              playerRef={playerRef}
+              src={liveUrl}
+              className="content-card-element"
+              autoPlay={true}
+              controls={true}
+              width="100%"
+              height="auto"
+            />
           ) : (
             <img className="content-card-element" src="/images/card.png" />
           )}
