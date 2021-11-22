@@ -2,8 +2,8 @@
 
 import Head from 'next/head';
 import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
 import ReactHlsPlayer from 'react-hls-player';
+import axios from 'axios';
 import Footer from '../components/Footer';
 import ButtonToIndex from '../components/ButtonToIndex';
 
@@ -18,20 +18,53 @@ export default function Home() {
       const res = await axios.head(url);
       return /2\d\d/.test(res.status.toString());
     } catch (err) {
-      console.log('err', url, err);
+      console.log(`No streaming is available. Message: ${err}`);
       return false;
     }
   }
 
   useEffect(() => {
-    checkHLSActive(liveUrl)
-      .then((result) => {
-        setIsHLSActive(result);
-      })
-      .catch((err) => {
-        console.log(`No streaming is available. Message: ${err}`);
-      });
+    checkHLSActive(liveUrl).then((result) => {
+      setIsHLSActive(result);
+    });
   }, []);
+
+  const GetLiveStream = () => {
+    if (isHLSActive) {
+      return (
+        <ReactHlsPlayer
+          playerRef={playerRef}
+          src={liveUrl}
+          className="content-card-element"
+          autoPlay={true}
+          controls={true}
+          width="100%"
+          height="auto"
+        />
+      );
+    }
+
+    if (process.env.NEXT_PUBLIC_CLOUD_FLARE_LIVE_URL) {
+      return (
+        <iframe
+          src={process.env.NEXT_PUBLIC_CLOUD_FLARE_LIVE_URL}
+          className="content-card-element"
+          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+          allowFullScreen={true}
+          id="stream-player"
+        />
+      );
+    }
+
+    return (
+      <img
+        className="content-card-element"
+        src="/images/card.png"
+        alt="banner card"
+      />
+    );
+  };
+
   return (
     <div>
       <Head>
@@ -40,6 +73,8 @@ export default function Home() {
 
         <link rel="preload" href="/images/background.png" as="image" />
         <link rel="preload" href="/images/card.png" as="image" />
+
+        <script src="https://embed.videodelivery.net/embed/sdk.latest.js" />
       </Head>
 
       <main>
@@ -91,26 +126,13 @@ export default function Home() {
         </div>
 
         <div className="card second-card">
-          {isHLSActive ? (
-            // <ReactHLS className="content-card-element" url={liveUrl} />
-            <ReactHlsPlayer
-              playerRef={playerRef}
-              src={liveUrl}
-              className="content-card-element"
-              autoPlay={true}
-              controls={true}
-              width="100%"
-              height="auto"
-            />
-          ) : (
-            <img className="content-card-element" src="/images/card.png" />
-          )}
+          <GetLiveStream />
         </div>
 
         <Footer />
       </main>
 
-      <style jsx>{`
+      <style jsx global>{`
         @font-face {
           font-family: Oriya MN;
           src: url('oriya-mn.ttf');
