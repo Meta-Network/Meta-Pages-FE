@@ -13,6 +13,7 @@ export default () => {
       <img className={styles.brandLogo} src="/images/logos/Cyberright.png" />
       <img className={styles.brandLogo} src="/images/logos/499Block.png" />
       <img className={styles.brandLogo} src="/images/logos/OGlabs.png" />
+      <img className={styles.brandLogo} src="/images/logos/ybb.png" />
     </footer>
   );
 };
