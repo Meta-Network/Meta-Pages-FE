@@ -1,70 +1,13 @@
 // noinspection CssUnknownTarget,HtmlUnknownTarget
 
 import Head from 'next/head';
-import React, { useEffect, useRef, useState } from 'react';
-import ReactHlsPlayer from 'react-hls-player';
-import axios from 'axios';
+import React from 'react';
 import Footer from '../components/Footer';
+import LogoLink from '../components/LogoLink';
 import ButtonToIndex from '../components/ButtonToIndex';
-
-const liveUrl = `https://${process.env.NEXT_PUBLIC_LIVE_HLS_DOMAIN}/live/${process.env.NEXT_PUBLIC_LIVE_HLS_SECRETS}/index.m3u8`;
+import GetLiveStream from '../components/GetLiveStream';
 
 export default function Home() {
-  const playerRef = useRef();
-  const [isHLSActive, setIsHLSActive] = useState(false);
-
-  async function checkHLSActive(url) {
-    try {
-      const res = await axios.head(url);
-      return /2\d\d/.test(res.status.toString());
-    } catch (err) {
-      console.log(`No streaming is available. Message: ${err}`);
-      return false;
-    }
-  }
-
-  useEffect(() => {
-    checkHLSActive(liveUrl).then((result) => {
-      setIsHLSActive(result);
-    });
-  }, []);
-
-  const GetLiveStream = () => {
-    if (isHLSActive) {
-      return (
-        <ReactHlsPlayer
-          playerRef={playerRef}
-          src={liveUrl}
-          className="content-card-element"
-          autoPlay={true}
-          controls={true}
-          width="100%"
-          height="auto"
-        />
-      );
-    }
-
-    if (process.env.NEXT_PUBLIC_CLOUD_FLARE_LIVE_ID) {
-      return (
-        <iframe
-          src={`https://iframe.videodelivery.net/${process.env.NEXT_PUBLIC_CLOUD_FLARE_LIVE_ID}`}
-          className="content-card-element"
-          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-          allowFullScreen={true}
-          id="stream-player"
-        />
-      );
-    }
-
-    return (
-      <img
-        className="content-card-element"
-        src="/images/card.png"
-        alt="banner card"
-      />
-    );
-  };
-
   return (
     <div>
       <Head>
@@ -76,6 +19,13 @@ export default function Home() {
 
         <script src="https://embed.videodelivery.net/embed/sdk.latest.js" />
       </Head>
+
+      <header>
+        <p>
+          Real META Token from meta.io is:
+          0x8807e69dC04155AF64172Cd6f0B4738F8068D0D4 (ETH)
+        </p>
+      </header>
 
       <main>
         <div className="card first-card">
@@ -89,38 +39,18 @@ export default function Home() {
           </h1>
 
           <div className="description">
-            <p>
-              <span>2021·11·22 ｜19:00～21:30 (GMT+8)</span>
-            </p>
-            <p>
-              <span
-                style={{
-                  verticalAlign: 'middle',
-                }}
-              >
-                正式发布
-              </span>
-              <ButtonToIndex />
-            </p>
             <p className="description-extra">
-              <a
+              <LogoLink
                 href="https://www.matataki.io/"
-                target="__blank"
-                style={{ paddingRight: 15 }}
-              >
-                <img
-                  className="logo-link"
-                  src="/images/logos/matataki.png"
-                  alt="Matataki"
-                />
-              </a>
-              <a href="https://www.meta.io/" target="__blank">
-                <img
-                  className="logo-link"
-                  src="/images/logos/meta-io.png"
-                  alt="Meta-io"
-                />
-              </a>
+                src="/images/logos/matataki.png"
+                alt="Matataki"
+              />
+              <LogoLink
+                href="https://www.meta.io/"
+                src="/images/logos/meta-io.png"
+                alt="meta.io"
+              />
+              <ButtonToIndex />
             </p>
           </div>
         </div>
@@ -138,10 +68,17 @@ export default function Home() {
           src: url('oriya-mn.ttf');
         }
 
+        header {
+          font-size: 1.1vw;
+          left: 50%;
+          top: 1vw;
+          position: fixed;
+          transform: translateX(-50%);
+        }
+
         main {
           display: flex;
           justify-content: space-around;
-          color: white;
           min-height: 100vh;
           align-items: center;
           flex-direction: row;
@@ -182,22 +119,6 @@ export default function Home() {
           display: inline-block;
         }
 
-        .content-card-element {
-          width: 40vw;
-          height: 22vw;
-        }
-
-        .content-card-container {
-          box-sizing: border-box;
-          display: inline-block;
-          overflow: hidden;
-          border: 0;
-          margin: 0;
-          padding: 0;
-          position: relative;
-          max-width: 100%;
-        }
-
         .description {
           display: flex;
           white-space: nowrap;
@@ -208,9 +129,13 @@ export default function Home() {
           justify-content: center;
         }
 
-        .logo-link {
-          width: 3vw;
-          height: 3vw;
+        .description-extra a {
+          vertical-align: text-top;
+        }
+
+        .hls-player {
+          width: 40vw;
+          height: 22vw;
         }
 
         @media only screen and (max-width: 600px) {
@@ -239,11 +164,6 @@ export default function Home() {
             align-items: center;
           }
 
-          .content-card-element {
-            width: 80vw;
-            height: 44vw;
-          }
-
           .logo-before-title {
             width: 8vw;
             height: 8.2vw;
@@ -257,36 +177,23 @@ export default function Home() {
             margin: 1vw 0 !important;
           }
 
-          .logo-link {
-            width: 7vw;
-            height: 7vw;
-          }
-
           .description-extra {
             margin-top: 2vw !important;
           }
-        }
-      `}</style>
 
-      <style jsx global>{`
-        html,
-        body {
-          padding: 0;
-          margin: 0;
-          background-size: cover;
-          background-image: url('/images/background.png');
-        }
-
-        .hls-player {
-          width: 40vw;
-          height: 22vw;
-        }
-
-        @media only screen and (max-width: 600px) {
           .hls-player {
             width: 80vw;
             height: 44vw;
           }
+        }
+
+        html,
+        body {
+          padding: 0;
+          margin: 0;
+          color: white;
+          background-size: cover;
+          background-image: url('/images/background.png');
         }
 
         p {
