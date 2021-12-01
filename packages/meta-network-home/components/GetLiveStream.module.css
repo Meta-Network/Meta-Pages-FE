@@ -1,0 +1,11 @@
+.contentCardElement {
+  width: 40vw;
+  height: 22vw;
+}
+
+@media only screen and (max-width: 600px) {
+  .contentCardElement {
+    width: 80vw;
+    height: 44vw;
+  }
+}

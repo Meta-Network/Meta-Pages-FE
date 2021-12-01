@@ -1,8 +1,20 @@
-.footer {
+.footerWrapper {
   width: 100%;
+  bottom: 2vw;
   display: flex;
   position: fixed;
-  bottom: 32px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.footerContacts {
+  display: flex;
+  margin-bottom: 2vw;
+}
+
+.footerBrands {
+  display: flex;
   justify-content: center;
   align-items: center;
 }
@@ -13,11 +25,13 @@
 }
 
 @media only screen and (max-width: 600px) {
-  .footer {
-    flex: 1;
-    flex-wrap: wrap;
+  .footerWrapper {
     margin-top: 20vw;
     position: static;
+  }
+  .footerBrands {
+    flex: 1;
+    flex-wrap: wrap;
     width: auto;
     margin-bottom: 10vw;
   }
