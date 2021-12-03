@@ -16,6 +16,15 @@
   background-color: rgb(218, 254, 96);
 }
 
+.linkToVideo {
+  position: relative;
+  top: 2.6vw;
+  left: -7.4vw;
+  font-size: 1.1vw;
+  text-decoration: none;
+  color: white;
+}
+
 @media only screen and (min-width: 600px) {
   .buttonToIndex:hover {
     border-radius: 5px;
