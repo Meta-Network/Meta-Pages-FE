@@ -17,7 +17,7 @@ export default () => {
           alt="Twitter"
         />
         <LogoLink
-          href="https://matrix.to/#/!RWJlSDkUlUNMHlXESQ:matrix.org?via=matrix.org"
+          href="https://matrix.to/#/!jrjmzTFiYYIuKnRpEg:matrix.org?via=matrix.org"
           src="/images/logos/element.svg"
           alt="Element"
         />
