@@ -261,7 +261,7 @@ const Home: NextPage = () => {
 
       <StyledtutorialBox>
         <StyledtutorialText
-          href={process.env.NEXT_PUBLIC_META_NETWORK_URL}
+          href={process.env.NEXT_PUBLIC_BUILD_SPACE_LEARN}
           target="_blank" rel="noopener noreferrer">{t('guide-build-space')}&nbsp;&nbsp;</StyledtutorialText>
       </StyledtutorialBox>
 
