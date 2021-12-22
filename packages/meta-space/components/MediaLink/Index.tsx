@@ -12,7 +12,7 @@ const LinkList = [
   {
     logo: HexagonImage,
     text: 'Meta Space Wiki',
-    url: 'https://github.com/Meta-Network',
+    url: process.env.NEXT_PUBLIC_META_SPACE_WIKI
   },
   {
     logo: MetaImage,
@@ -22,7 +22,7 @@ const LinkList = [
   {
     logo: MetaImage,
     text: 'Meta.io',
-    url: 'https://meta.io'
+    url: process.env.NEXT_PUBLIC_META
   }
 ]
 
