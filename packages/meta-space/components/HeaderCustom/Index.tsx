@@ -37,38 +37,21 @@ const HeaderCustom: FC = () => {
     </Menu>
   )
 
-  return <StyledHeader>
+  return <section className='flex justify-between p-5'>
     <div className="logo" />
-    <StyledMenu>
-      <li>
-        <Dropdown overlay={menu} trigger={['hover']}>
-          <StyledItemWrapper>
-            <GlobalOutlined />
-            {t(language)}
-          </StyledItemWrapper>
-        </Dropdown>
-      </li>
-    </StyledMenu>
-  </StyledHeader>
+    <section className='flex items-center'>
+      <Dropdown overlay={menu} trigger={['hover']}>
+        <span className='flex items-center text-sm text-white cursor-pointer'>
+          <GlobalOutlined className='flex items-center text-base mr-1' />
+          {t(language)}
+        </span>
+      </Dropdown>
+      <a href={process.env.NEXT_PUBLIC_META_CMS_URL} target="_blank" rel="noopener noreferrer">
+        <button className='ml-4 text-sm bg-[#cfff38] hover:bg-[#9cbe29] text-black px-5 py-2 rounded-full'>Launch APP</button>
+      </a>
+    </section>
+  </section>
 }
 
-const StyledHeader = styled.section`
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 20px;
-`
-export const StyledMenu = styled.ul`
-  list-style: none;
-`
-export const StyledItemWrapper = styled.li`
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  cursor: pointer;
-  color: #fff;
-  .anticon {
-    font-size: 16px;
-    margin-right: 4px;
-  }
-`
+
 export default HeaderCustom
