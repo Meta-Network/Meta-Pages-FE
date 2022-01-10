@@ -47,7 +47,7 @@ const HeaderCustom: FC = () => {
         </span>
       </Dropdown>
       <a href={process.env.NEXT_PUBLIC_META_CMS_URL} target="_blank" rel="noopener noreferrer">
-        <button className='ml-4 text-sm bg-[#cfff38] hover:bg-[#9cbe29] text-black px-5 py-2 rounded-full'>Launch APP</button>
+        <button className='ml-4 text-sm bg-[#cfff38] hover:bg-[#bbe433] text-black px-5 py-2 rounded-full'>{t('button.launch')}</button>
       </a>
     </section>
   </section>
