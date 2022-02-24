@@ -16,6 +16,7 @@ import Footer from '../components/Footer/Index'
 import { DomainData } from '../typings/cms'
 import HeaderCustom from '../components/HeaderCustom/Index'
 import Item from '../components/Item'
+import { spaceLink } from '../utils'
 
 type SelectValueState = 'result' | 'history'
 
@@ -115,7 +116,7 @@ const Home: NextPage = () => {
         StoreSet(KeyMetaSpaceHistory, JSON.stringify([space]))
       } else {
         let historyList: DomainData[] = JSON.parse(historyStringify || '[]')
-        const historyListIdx = historyList.findIndex(i => i.domain === space.domain)
+        const historyListIdx = historyList.findIndex(i => i.metaSpacePrefix === space.metaSpacePrefix)
 
         if (~historyListIdx) {
           const temp = cloneDeep(historyList[historyListIdx])
@@ -143,7 +144,7 @@ const Home: NextPage = () => {
     (space: DomainData) => {
       const historyStringify = StoreGet(KeyMetaSpaceHistory)
       let historyList: DomainData[] = JSON.parse(historyStringify || '[]')
-      const historyListIdx = historyList.findIndex(i => i.domain === space.domain)
+      const historyListIdx = historyList.findIndex(i => i.metaSpacePrefix === space.metaSpacePrefix)
 
       if (~historyListIdx) {
         historyList.splice(historyListIdx, 1)
@@ -173,12 +174,12 @@ const Home: NextPage = () => {
    */
   const handleVisitEvent = () => {
     if (!searchValue) {
-      message.info('Enter search content')
+      message.warning(t('message.enterSearchContent'))
       return
     }
 
-    if (!isEmpty(searchResultList) && searchResultList[0].domain) {
-      window.open(`https://${searchResultList[0].domain}`, '_blank')
+    if (!isEmpty(searchResultList) && searchResultList[0].metaSpacePrefix) {
+      window.open(spaceLink(searchResultList[0].metaSpacePrefix), '_blank')
     } else {
       message.info(t('no-address-to-jump'))
     }
