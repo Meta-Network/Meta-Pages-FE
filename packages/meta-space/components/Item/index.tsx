@@ -6,6 +6,7 @@ import { HexagonIcon } from '../Icon/Index'
 import { CloseOutlined } from '@ant-design/icons'
 import { StyledSearchList, StyledSearchListLink, StyledSearchListText, StyledListIcon, StyledEmpty } from '../../styles/pages/index.styles'
 import { DomainData } from '../../typings/cms'
+import { spaceLink } from '../../utils'
 
 interface Props {
   readonly list: DomainData[]
@@ -21,7 +22,7 @@ const Item: React.FC<Props> = ({ list, isDelete = false, saveHistory, deleteHist
       {
         list.map((i, key) => (
           <li key={key} onClick={() => saveHistory(i)}>
-            <StyledSearchListLink href={`https://${i.domain}`} target="_blank" rel="noopener noreferrer">
+            <StyledSearchListLink href={spaceLink(i.metaSpacePrefix)} target="_blank" rel="noopener noreferrer">
               {
                 i.siteInfo.favicon
                   ? <Image

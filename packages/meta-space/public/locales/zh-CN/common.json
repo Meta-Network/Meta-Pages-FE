@@ -10,5 +10,6 @@
   "visit": "访问",
   "footer-copyright": "© 2021 Meta Network 版权所有",
   "no-address-to-jump": "无地址跳转",
-  "button.launch": "打开 APP"
+  "button.launch": "打开 APP",
+  "message.enterSearchContent": "输入搜索内容"
 }
