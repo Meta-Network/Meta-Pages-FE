@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import type { NextPage } from 'next'
-import { Button, Input, Empty, Select, message, Image } from 'antd'
+import { Button, Input, Select, message } from 'antd'
 import styled from 'styled-components'
 import { ArrowRightOutlined } from '@ant-design/icons'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -11,19 +11,19 @@ import { isEmpty, cloneDeep, trim } from 'lodash'
 import { useMount, useDebounceFn } from 'ahooks'
 import { useTranslation } from 'next-i18next'
 import { useSpring, animated, useSpringRef, useChain } from 'react-spring'
-import HistoryList from '../components/HistoryList/Index'
 import MediaLink from '../components/MediaLink/Index'
 import Footer from '../components/Footer/Index'
 import { DomainData } from '../typings/cms'
-import { HistoryListState } from '../typings'
 import HeaderCustom from '../components/HeaderCustom/Index'
-import { StyledSearchList, StyledSearchListLink, StyledSearchListText, StyledListIcon } from '../styles/pages/index.styles'
+import Item from '../components/Item'
+import { spaceLink } from '../utils'
 
+type SelectValueState = 'result' | 'history'
 
 const { Search } = Input
 const { Option } = Select
-
-const KeyMetaSpaceHistory = 'MetaSpaceHistory'
+const KeyMetaSpaceHistory = 'MetaSpaceHistoryV1'
+const KeyMetaSpaceHistoryMax = 10
 
 const Home: NextPage = () => {
   const { t } = useTranslation('common')
@@ -31,11 +31,11 @@ const Home: NextPage = () => {
   // 搜索结果列表
   const [searchResultList, setTearchResultList] = useState<DomainData[]>([])
   // 搜索历史列表
-  const [searchHistoryList, setSearchHistoryList] = useState<HistoryListState[]>([])
+  const [searchHistoryList, setSearchHistoryList] = useState<DomainData[]>([])
   // 搜索内容
   const [searchValue, setSearchValue] = useState<string>('')
   // 当前选择值
-  const [selectValue, setSelectValue] = useState<'result' | 'history'>('result')
+  const [selectValue, setSelectValue] = useState<SelectValueState>('result')
   const [loadingRandom, setLoadingRandom] = useState<boolean>(false)
 
   const LogoAnimatedStyles = useSpring({
@@ -74,10 +74,6 @@ const Home: NextPage = () => {
       if (data) {
         setTearchResultList(data)
       }
-
-      if (!isEmpty(data)) {
-        handleHistory(value)
-      }
     },
     { wait: 300 },
   )
@@ -95,46 +91,42 @@ const Home: NextPage = () => {
   }
 
   /**
- * 获取历史浏览
- */
+   * 获取历史浏览
+  */
   const fetchHistory = useCallback(() => {
     const historyStringify = StoreGet(KeyMetaSpaceHistory)
-    let historyList: HistoryListState[] = historyStringify ? JSON.parse(historyStringify) : []
-    setSearchHistoryList(historyList)
+    let historyList: DomainData[] = JSON.parse(historyStringify || '[]')
+    setSearchHistoryList(historyList.reverse())
   }, [])
 
   /**
    * 处理历史记录
    */
-  const handleHistory = useCallback(
-    (domain: string) => {
+  const saveHistory = useCallback(
+    (space: DomainData) => {
 
-      if (!domain) {
+      if (!space) {
         return
       }
 
       const historyStringify = StoreGet(KeyMetaSpaceHistory)
-      const historyData = {
-        domain: trim(domain),
-        lastTime: Date.now()
-      }
 
       // 没有历史记录
       if (isEmpty(historyStringify)) {
-        StoreSet(KeyMetaSpaceHistory, JSON.stringify([historyData]))
+        StoreSet(KeyMetaSpaceHistory, JSON.stringify([space]))
       } else {
-        let historyList: HistoryListState[] = historyStringify ? JSON.parse(historyStringify) : []
-        const historyListIdx = historyList.findIndex(i => i.domain === domain)
+        let historyList: DomainData[] = JSON.parse(historyStringify || '[]')
+        const historyListIdx = historyList.findIndex(i => i.metaSpacePrefix === space.metaSpacePrefix)
 
         if (~historyListIdx) {
           const temp = cloneDeep(historyList[historyListIdx])
           historyList.splice(historyListIdx, 1)
           historyList.push(temp)
         } else {
-          if (historyList.length >= 10) {
+          if (historyList.length >= KeyMetaSpaceHistoryMax) {
             historyList.shift()
           }
-          historyList.push(historyData)
+          historyList.push(space)
         }
 
         StoreSet(KeyMetaSpaceHistory, JSON.stringify(historyList))
@@ -146,20 +138,13 @@ const Home: NextPage = () => {
   )
 
   /**
-   * 处理搜索回车
-   */
-  const handleSearch = (value: string) => {
-    fetchSearchResult(value)
-  }
-
-  /**
    * 删除历史记录
    */
   const deleteHistory = useCallback(
-    (item: HistoryListState) => {
+    (space: DomainData) => {
       const historyStringify = StoreGet(KeyMetaSpaceHistory)
-      let historyList: HistoryListState[] = historyStringify ? JSON.parse(historyStringify) : []
-      const historyListIdx = historyList.findIndex(i => i.domain === item.domain)
+      let historyList: DomainData[] = JSON.parse(historyStringify || '[]')
+      const historyListIdx = historyList.findIndex(i => i.metaSpacePrefix === space.metaSpacePrefix)
 
       if (~historyListIdx) {
         historyList.splice(historyListIdx, 1)
@@ -169,22 +154,6 @@ const Home: NextPage = () => {
     },
     [fetchHistory],
   )
-
-  // init
-  useMount(
-    () => {
-      fetchHistory()
-    }
-  )
-
-  /**
-   * 处理点击历史记录
-   */
-  const handleHistoryEventClick = (val: string) => {
-    setSearchValue(val)
-    handleSearch(val)
-    setSelectValue('result')
-  }
 
   /**
    * random click
@@ -205,16 +174,21 @@ const Home: NextPage = () => {
    */
   const handleVisitEvent = () => {
     if (!searchValue) {
-      message.info('Enter search content')
+      message.warning(t('message.enterSearchContent'))
       return
     }
 
-    if (!isEmpty(searchResultList) && searchResultList[0].domain) {
-      window.open(`https://${searchResultList[0].domain}`, '_blank')
+    if (!isEmpty(searchResultList) && searchResultList[0].metaSpacePrefix) {
+      window.open(spaceLink(searchResultList[0].metaSpacePrefix), '_blank')
     } else {
       message.info(t('no-address-to-jump'))
     }
   }
+
+  // init
+  useMount(() => {
+    fetchHistory()
+  })
 
   return (
     <StyledWrapper>
@@ -239,7 +213,7 @@ const Home: NextPage = () => {
             <StyledSearchInput
               placeholder={t('sub-domain')}
               style={{ width: 240 }}
-              onSearch={handleSearch}
+              onSearch={fetchSearchResult}
               onChange={e => handleSearchChange(e)}
               value={searchValue} />
             <StyledSearchUrl>.{process.env.NEXT_PUBLIC_META_SPACE_DOMAIN_URL}</StyledSearchUrl>
@@ -254,58 +228,33 @@ const Home: NextPage = () => {
               onClick={handleRandomEvent}>{t('random')}</StyledSearchButton>
           </StyledSearchButtonBox>
         </StyledSearchBoxInput>
-
-        {/* History or Search result */}
         {
           searchValue
             ? <StyledSearchResult>
-                <StyledSearchSelect value={selectValue} defaultValue="result" style={{ width: 120 }} onChange={(v: any) => setSelectValue(v)}
-                  dropdownClassName="1"
-                  className="custom-search-select"
-                >
-                  <Option value="result">{t('result')}</Option>
-                  <Option value="history">{t('history')}</Option>
-                </StyledSearchSelect>
-                {
-                  selectValue === 'result'
-                    ? <>
-                      <StyledSearchList>
-                        {
-                          searchResultList.map((i, key) => (
-                            <li key={key}>
-                              <StyledSearchListLink href={`https://${i.domain}`} target="_blank" rel="noopener noreferrer">
-                                {
-                                  i.siteInfo.favicon
-                                    ? <Image src={i.siteInfo.favicon} width={26} height={26} alt={i.siteInfo.title} preview={false} style={{ objectFit: 'contain' }} />
-                                    : <StyledListIcon />
-                                }
-                                <StyledSearchListText>{i.siteInfo.title} - {i.siteInfo.author}</StyledSearchListText>
-                              </StyledSearchListLink>
-                            </li>
-                          ))
-                        }
-
-                        {
-                          searchResultList.length <= 0
-                            ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
-                            : null
-                        }
-                      </StyledSearchList>
-                    </>
-                    : selectValue === 'history'
-                      ? <HistoryList
-                        list={searchHistoryList}
-                        handleHistoryEventClick={handleHistoryEventClick}
-                        deleteHistory={deleteHistory}></HistoryList>
-                      : null
+              <StyledSearchSelect
+                value={selectValue}
+                defaultValue="result" style={{ width: 120 }}
+                onChange={(val: any) => setSelectValue(val as SelectValueState)}
+                className="custom-search-select"
+              >
+                <Option value="result">{t('result')}</Option>
+                <Option value="history">{t('history')}</Option>
+              </StyledSearchSelect>
+              <Item
+                list={
+                  selectValue === 'result' ? searchResultList : selectValue === 'history' ? searchHistoryList : []
                 }
-              </StyledSearchResult>
+                isDelete={selectValue === 'history'}
+                saveHistory={saveHistory}
+                deleteHistory={deleteHistory}></Item>
+            </StyledSearchResult>
             : <StyledSearchResult>
               <StyledSearchTitle>{t('history')}</StyledSearchTitle>
-              <HistoryList
+              <Item
                 list={searchHistoryList}
-                handleHistoryEventClick={handleHistoryEventClick}
-                deleteHistory={deleteHistory}></HistoryList>
+                isDelete={true}
+                saveHistory={saveHistory}
+                deleteHistory={deleteHistory}></Item>
             </StyledSearchResult>
         }
 
@@ -313,7 +262,7 @@ const Home: NextPage = () => {
 
       <StyledtutorialBox>
         <StyledtutorialText
-          href={process.env.NEXT_PUBLIC_META_NETWORK_URL}
+          href={process.env.NEXT_PUBLIC_BUILD_SPACE_LEARN}
           target="_blank" rel="noopener noreferrer">{t('guide-build-space')}&nbsp;&nbsp;</StyledtutorialText>
       </StyledtutorialBox>
 

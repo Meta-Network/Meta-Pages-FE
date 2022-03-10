@@ -1,9 +1,11 @@
 // noinspection CssUnknownTarget,HtmlUnknownTarget
 
 import Head from 'next/head';
-import Image from 'next/image';
+import React from 'react';
 import Footer from '../components/Footer';
+import LogoLink from '../components/LogoLink';
 import ButtonToIndex from '../components/ButtonToIndex';
+import GetLiveStream from '../components/GetLiveStream';
 
 export default function Home() {
   return (
@@ -12,12 +14,21 @@ export default function Home() {
         <title>Meta Network</title>
         <link rel="icon" href="/favicon.ico" />
 
-        <link rel="preload" href="http://127.0.0.1:3000/" as="image" />
+        <link rel="preload" href="/images/background.png" as="image" />
         <link rel="preload" href="/images/card.png" as="image" />
+
+        <script src="https://embed.videodelivery.net/embed/sdk.latest.js" />
       </Head>
 
+      <header>
+        <p>
+          Real META Token from meta.io is:
+          0x8807e69dC04155AF64172Cd6f0B4738F8068D0D4 (ETH)
+        </p>
+      </header>
+
       <main>
-        <card className="first-card">
+        <div className="card first-card">
           <h1 className="title">
             <img
               className="logo-before-title"
@@ -28,59 +39,52 @@ export default function Home() {
           </h1>
 
           <div className="description">
-            <p>
-              <span>
-                2021·11·22 ｜19:00～21:30 (GMT+8)
-              </span>
-            </p>
-            <p>
-              <span style={{
-                verticalAlign: 'middle',
-              }}>
-                正式发布
-              </span>
+            <p className="description-extra">
+              <LogoLink
+                href="https://www.matataki.io/"
+                src="/images/logos/matataki.png"
+                alt="Matataki"
+              />
+              <LogoLink
+                href="https://www.meta.io/"
+                src="/images/logos/meta-io.png"
+                alt="meta.io"
+              />
               <ButtonToIndex />
             </p>
-            <p className="description-extra">
-              <a href="https://www.matataki.io/" target="__blank" style={{ paddingRight: 15 }}>
-                <img className="logo-link" src="/images/logos/matataki.png"  alt="Matataki"/>
-              </a>
-              <a href="https://www.meta.io/" target="__blank">
-                <img className="logo-link" src="/images/logos/meta-io.png"  alt="Meta-io"/>
-              </a>
-            </p>
           </div>
-        </card>
+        </div>
 
-        <card className="second-card">
-          <div className="card-image-container">
-            <img
-              className="card-image"
-              src="/images/card.png"
-            />
-          </div>
-        </card>
+        <div className="card second-card">
+          <GetLiveStream />
+        </div>
 
         <Footer />
       </main>
 
-
-      <style jsx preload>{`
+      <style jsx global>{`
         @font-face {
           font-family: Oriya MN;
           src: url('oriya-mn.ttf');
         }
 
+        header {
+          font-size: 1.1vw;
+          left: 50%;
+          top: 1vw;
+          position: fixed;
+          transform: translateX(-50%);
+        }
+
         main {
           display: flex;
           justify-content: space-around;
-          color: white;
           min-height: 100vh;
           align-items: center;
           flex-direction: row;
         }
 
-        card {
+        .card {
           flex: 1;
           display: flex;
           flex-direction: column;
@@ -115,24 +119,6 @@ export default function Home() {
           display: inline-block;
         }
 
-        .card-image {
-          width: 40vw;
-          height: 22vw;
-        }
-
-        .card-image-container {
-          box-sizing: border-box;
-          display: inline-block;
-          overflow: hidden;
-          width: initial;
-          height: initial;
-          border: 0;
-          margin: 0;
-          padding: 0;
-          position: relative;
-          max-width: 100%;
-        }
-
         .description {
           display: flex;
           white-space: nowrap;
@@ -143,9 +129,13 @@ export default function Home() {
           justify-content: center;
         }
 
-        .logo-link {
-          width: 3vw;
-          height: 3vw;
+        .description-extra a {
+          vertical-align: text-top;
+        }
+
+        .hls-player {
+          width: 40vw;
+          height: 22vw;
         }
 
         @media only screen and (max-width: 600px) {
@@ -174,11 +164,6 @@ export default function Home() {
             align-items: center;
           }
 
-          .card-image {
-            width: 80vw;
-            height: 44vw;
-          }
-
           .logo-before-title {
             width: 8vw;
             height: 8.2vw;
@@ -192,31 +177,30 @@ export default function Home() {
             margin: 1vw 0 !important;
           }
 
-          .logo-link {
-            width: 7vw;
-            height: 7vw;
-          }
-
           .description-extra {
             margin-top: 2vw !important;
           }
-        }
-      `}</style>
 
-      <style jsx global>{`
+          .hls-player {
+            width: 80vw;
+            height: 44vw;
+          }
+        }
+
         html,
         body {
           padding: 0;
           margin: 0;
+          color: white;
           background-size: cover;
           background-image: url('/images/background.png');
         }
-        
+
         p {
           padding: 0;
           margin: 0.5vw 0;
         }
       `}</style>
     </div>
-  )
+  );
 }
